@@ -1,0 +1,6 @@
+install.linker = "isolated"
+
+[test]
+timeout = 10_000
+coverageReporter = ["text"]
+coverageThreshold = 0.7

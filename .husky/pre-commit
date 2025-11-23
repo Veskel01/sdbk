@@ -1,0 +1,2 @@
+bun check:types
+bun lint-staged
