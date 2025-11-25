@@ -24,9 +24,7 @@ const BIOME_LINTABLE_FILES = [
  */
 
 export default {
-  [`*.{${BIOME_LINTABLE_FILES.join(',')}}`]: [
-    'biome check --write',
-    'biome format --write'
-  ],
-  '*.{md,mdx}': ['markdownlint --fix']
+  [`*.{${BIOME_LINTABLE_FILES.join(',')}}`]: ['biome check --write', 'biome format --write']
+  // TODO
+  // '*.{md,mdx}': ['markdownlint --fix']
 };

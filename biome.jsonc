@@ -1,12 +1,29 @@
 {
   "$schema": "./node_modules/@biomejs/biome/configuration_schema.json",
   "extends": ["ultracite/core"],
+  "linter": {
+    "domains": {
+      "test": "all"
+    },
+    "rules": {
+      "style": {
+        "useConsistentTypeDefinitions": "off",
+        "useConsistentMemberAccessibility": {
+          "level": "warn",
+          "options": {
+            "accessibility": "explicit"
+          }
+        }
+      }
+    }
+  },
   "javascript": {
     "globals": ["bun"],
     "assist": {
       "enabled": true
     },
     "formatter": {
+      "lineWidth": 100,
       "enabled": true,
       "arrowParentheses": "always",
       "attributePosition": "auto",
