@@ -1,5 +1,8 @@
 /**
- * Field permissions schema.
+ * Permissions attached to a single field after parsing `DEFINE FIELD`.
+ *
+ * @remarks
+ * Values mirror the `PERMISSIONS` clause as resolved for that field.
  */
 export interface FieldPermissionsSchema {
   full: boolean;
@@ -11,14 +14,15 @@ export interface FieldPermissionsSchema {
 }
 
 /**
- * Reference configuration schema.
+ * Configuration of a `REFERENCE` clause for a field.
  */
 export interface ReferenceConfigSchema {
   onDelete: string | undefined;
 }
 
 /**
- * Field definition schema.
+ * Parsed definition of a single table field.
+ *
  * @see https://surrealdb.com/docs/surrealql/statements/define/field
  */
 export interface FieldSchema {
@@ -41,7 +45,7 @@ export interface FieldSchema {
 }
 
 /**
- * Table permissions schema.
+ * Table‑level permissions resolved from a `DEFINE TABLE` statement.
  */
 export interface TablePermissionsSchema {
   full: boolean;
@@ -53,7 +57,7 @@ export interface TablePermissionsSchema {
 }
 
 /**
- * Relation configuration schema.
+ * Shape of a `TYPE RELATION` configuration for relation tables.
  */
 export interface RelationConfigSchema {
   from: string | undefined;
@@ -62,7 +66,7 @@ export interface RelationConfigSchema {
 }
 
 /**
- * Changefeed configuration schema.
+ * Configuration of a `CHANGEFEED` clause attached to a table.
  */
 export interface ChangefeedConfigSchema {
   duration: string | undefined;
@@ -70,7 +74,12 @@ export interface ChangefeedConfigSchema {
 }
 
 /**
- * Table definition schema.
+ * Parsed definition of a SurrealDB table.
+ *
+ * @remarks
+ * Instances of this interface are produced by {@link BuildSchema} from `DEFINE TABLE`
+ * and related `DEFINE FIELD` statements.
+ *
  * @see https://surrealdb.com/docs/surrealql/statements/define/table
  */
 export interface TableSchema {

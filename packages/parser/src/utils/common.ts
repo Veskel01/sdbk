@@ -1,8 +1,6 @@
 import type { AfterFirstWord, FirstWord, Trim, Upper } from './string';
 
-/**
- * Result type for ExtractNameAndModifiers.
- */
+/** Result produced by {@link ExtractNameAndModifiers}. */
 export interface NameAndModifiers<
   Name extends string = string,
   Rest extends string = string,
@@ -16,20 +14,11 @@ export interface NameAndModifiers<
 }
 
 /**
- * Extract name and modifiers (OVERWRITE, IF NOT EXISTS) from a statement body.
- * This is a common pattern used in DEFINE statements.
+ * Extracts the logical name and leading modifiers (`OVERWRITE`, `IF NOT EXISTS`) from a DEFINE body.
  *
- * @example
- * ```typescript
- * type Result = ExtractNameAndModifiers<'OVERWRITE myTable SCHEMAFULL'>;
- * // { name: 'myTable', rest: 'SCHEMAFULL', overwrite: true, ifNotExists: false }
- *
- * type Result2 = ExtractNameAndModifiers<'IF NOT EXISTS myField ON TABLE user'>;
- * // { name: 'myField', rest: 'ON TABLE user', overwrite: false, ifNotExists: true }
- *
- * type Result3 = ExtractNameAndModifiers<'myIndex ON user'>;
- * // { name: 'myIndex', rest: 'ON user', overwrite: false, ifNotExists: false }
- * ```
+ * @remarks
+ * Centralises the common \"strip modifiers, then read the name\" pattern used by most
+ * `DEFINE *` parsers so that edge‑case handling (spacing, casing) lives in one place.
  */
 export type ExtractNameAndModifiers<S extends string> = Upper<FirstWord<S>> extends 'OVERWRITE'
   ? NameAndModifiers<FirstWord<AfterFirstWord<S>>, AfterFirstWord<AfterFirstWord<S>>, true, false>
@@ -37,16 +26,7 @@ export type ExtractNameAndModifiers<S extends string> = Upper<FirstWord<S>> exte
     ? ExtractAfterIfNotExists<S>
     : NameAndModifiers<FirstWord<S>, AfterFirstWord<S>, false, false>;
 
-/**
- * Helper to extract name and rest after IF NOT EXISTS modifier.
- * Skips the 3 words "IF", "NOT", "EXISTS" and extracts the name from the rest.
- *
- * @example
- * ```typescript
- * type Result = ExtractAfterIfNotExists<'IF NOT EXISTS myField ON TABLE user'>;
- * // { name: 'myField', rest: 'ON TABLE user', overwrite: false, ifNotExists: true }
- * ```
- */
+/** Helper for {@link ExtractNameAndModifiers} to handle the `IF NOT EXISTS` form. */
 export type ExtractAfterIfNotExists<S extends string> =
   S extends `${string} ${string} ${string} ${infer Rest}`
     ? NameAndModifiers<FirstWord<Trim<Rest>>, AfterFirstWord<Trim<Rest>>, false, true>

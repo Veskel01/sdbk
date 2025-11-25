@@ -24,42 +24,21 @@ import type {
 type _Validate<S extends string> = TokenizerParse<FieldTypeTokenizer, Trim<S>>;
 
 /**
- * Parses a SurrealQL type string and returns the corresponding TypeScript type.
+ * Parses a SurrealQL type definition string into its corresponding TypeScript type at compile time.
  *
  * @remarks
- * This type performs compile-time parsing of SurrealQL type definitions and maps them
- * to their TypeScript equivalents. It supports nested types up to 10 levels deep.
+ * - If the input contains characters not allowed by {@link FieldTypeTokenizer}, the result is a {@link TokenError}.
+ * - If the type nesting exceeds 10 levels, the result is {@link ParseErrors.TypeDepthExceeded}.
+ * - Otherwise the resulting type is a structural TypeScript representation (primitives, arrays, sets, records, tuples, object literals and unions).
  *
- * **Supported types:**
- * - Primitives: `string`, `int`, `float`, `number`, `decimal`, `bool`
- * - Date/Time: `datetime`, `duration`, `duration<subtype>`
- * - Collections: `array<T>`, `set<T>`, `option<T>`
- * - Records: `record`, `record<table>`, `record<table1|table2>`
- * - Spatial: `geometry`, `geometry<point>`, `geometry<polygon>`, etc.
- * - Special: `range<T>`, `bytes`, `uuid`, `ulid`, `object`, `any`
- * - Literals: `9 | "nine"`, `{ error: string } | "ok"`, etc.
- * - Tuples: `[string, number, bool]`
- *
- * @typeParam S - The SurrealQL type string to parse
+ * @typeParam S - SurrealQL `TYPE` clause content (for example `'array<string>'` or `'record<user|post>'`).
  *
  * @example
- * ```typescript
- * // Primitive types
- * type Str = ParseDataType<'string'>;           // string
- * type Num = ParseDataType<'int'>;              // number
- *
- * // Collection types
- * type Arr = ParseDataType<'array<string>'>;    // string[]
- * type Opt = ParseDataType<'option<int>'>;      // number | null
- *
- * // Tuple types
- * type Tup = ParseDataType<'[string, int, bool]'>; // [string, number, boolean]
- *
- * // Record types
- * type Rec = ParseDataType<'record<user>'>;     // RecordId<'user'>
- *
- * // Literal types
- * type Lit = ParseDataType<'9 | "9" | "nine"'>; // 9 | "9" | "nine"
+ * ```ts
+ * // Inferring a field's runtime type from its SurrealQL declaration
+ * type UserId = ParseDataType<'record<user>'>;             // RecordId<'user'>
+ * type Tags   = ParseDataType<'array<string>'>;            // string[]
+ * type State  = ParseDataType<'\"draft\" | \"published\"'>; // 'draft' | 'published'
  * ```
  */
 export type ParseDataType<S extends string> = _Validate<S> extends infer V

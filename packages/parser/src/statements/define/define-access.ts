@@ -65,7 +65,7 @@ export interface RecordJwtConfig<
 }
 
 /**
- * Base access result interface.
+ * Common fields shared by all `DEFINE ACCESS` result types.
  */
 interface AccessResultBase<
   Name extends string = string,
@@ -81,7 +81,11 @@ interface AccessResultBase<
 }
 
 /**
- * Result of parsing a DEFINE ACCESS ... TYPE BEARER statement.
+ * Result of parsing a `DEFINE ACCESS ... TYPE BEARER` statement.
+ *
+ * @remarks
+ * Carries the bearer target (`FOR USER` / `FOR RECORD`), authentication expression
+ * and any fine‑grained duration configuration.
  */
 export interface BearerAccessResult<
   Name extends string = string,
@@ -99,7 +103,10 @@ export interface BearerAccessResult<
 }
 
 /**
- * Result of parsing a DEFINE ACCESS ... TYPE JWT statement.
+ * Result of parsing a `DEFINE ACCESS ... TYPE JWT` statement.
+ *
+ * @remarks
+ * Contains the selected JWT algorithm / key / URL as well as the session duration expression.
  */
 export interface JwtAccessResult<
   Name extends string = string,
@@ -117,7 +124,10 @@ export interface JwtAccessResult<
 }
 
 /**
- * Result of parsing a DEFINE ACCESS ... TYPE RECORD statement.
+ * Result of parsing a `DEFINE ACCESS ... TYPE RECORD` statement.
+ *
+ * @remarks
+ * Encodes the `SIGNUP` / `SIGNIN` expressions, JWT settings (if any) and token/session durations.
  */
 export interface RecordAccessResult<
   Name extends string = string,

@@ -9,19 +9,23 @@ import type {
 } from '../../utils';
 
 /**
- * Result type for parsed DEFINE INDEX statements.
+ * Result of parsing a `DEFINE INDEX` statement.
  *
- * @template Name - The index name
- * @template Table - The table the index is on
- * @template Fields - Array of indexed fields
- * @template Unique - Whether the index enforces uniqueness
- * @template IndexType - The type of index (unique, search, count, hnsw)
- * @template Overwrite - Whether OVERWRITE modifier is present
- * @template IfNotExists - Whether IF NOT EXISTS modifier is present
- * @template Analyzer - Analyzer name for FULLTEXT indexes
- * @template Comment - Optional comment
- * @template Concurrently - Whether CONCURRENTLY modifier is present
- * @template HnswCfg - HNSW configuration (dimension, type, dist, efc, m)
+ * @remarks
+ * Models both simple secondary indexes and advanced variants such as full‑text
+ * or HNSW vector indexes. This structure is later transformed into {@link IndexSchema}.
+ *
+ * @template Name - Index name identifier.
+ * @template Table - Name of the table the index belongs to.
+ * @template Fields - Normalized list of indexed field paths.
+ * @template Unique - Whether the index enforces uniqueness.
+ * @template IndexType - Index flavour (`'unique'`, `'search'`, `'fulltext'`, `'count'`, `'hnsw'`).
+ * @template Overwrite - Whether `OVERWRITE` was used.
+ * @template IfNotExists - Whether `IF NOT EXISTS` was used.
+ * @template Analyzer - Analyzer name for text search indexes, if present.
+ * @template Comment - Optional `COMMENT` text.
+ * @template Concurrently - Whether `CONCURRENTLY` was specified.
+ * @template HnswCfg - Parsed HNSW configuration for vector indexes, if applicable.
  */
 export interface IndexResult<
   Name extends string = string,

@@ -1,12 +1,4 @@
-/**
- * Trims whitespace from both ends of a string type.
- *
- * @example
- * ```typescript
- * type Result = Trim<'  hello  '>; // 'hello'
- * type Result2 = Trim<'\n test \t'>; // 'test'
- * ```
- */
+/** Trims all leading and trailing whitespace characters from a string literal type. */
 export type Trim<T extends string> = T extends ` ${infer R}`
   ? Trim<R>
   : T extends `${infer R} `
@@ -25,25 +17,10 @@ export type Trim<T extends string> = T extends ` ${infer R}`
                 ? Trim<R>
                 : T;
 
-/**
- * Converts string to uppercase for case-insensitive matching.
- *
- * @example
- * ```typescript
- * type Result = Upper<'hello'>; // 'HELLO'
- * ```
- */
+/** Uppercases a string literal for case‑insensitive matching. */
 export type Upper<S extends string> = Uppercase<S>;
 
-/**
- * Extracts first word from a string (stops at space or end).
- *
- * @example
- * ```typescript
- * type Result = FirstWord<'hello world'>; // 'hello'
- * type Result2 = FirstWord<'single'>; // 'single'
- * ```
- */
+/** Extracts the first whitespace‑separated token from a string literal. */
 export type FirstWord<S extends string> = S extends `${infer Word} ${string}`
   ? Word
   : S extends `${infer Word}\n${string}`
@@ -52,15 +29,7 @@ export type FirstWord<S extends string> = S extends `${infer Word} ${string}`
       ? Word
       : S;
 
-/**
- * Extracts rest after first word.
- *
- * @example
- * ```typescript
- * type Result = AfterFirstWord<'hello world test'>; // 'world test'
- * type Result2 = AfterFirstWord<'single'>; // ''
- * ```
- */
+/** Returns the substring after the first whitespace‑separated token. */
 export type AfterFirstWord<S extends string> = S extends `${string} ${infer Rest}`
   ? Trim<Rest>
   : S extends `${string}\n${infer Rest}`
@@ -69,18 +38,7 @@ export type AfterFirstWord<S extends string> = S extends `${string} ${infer Rest
       ? Trim<Rest>
       : '';
 
-/**
- * Normalizes whitespace by collapsing multiple consecutive spaces/tabs/newlines into single space.
- * Also normalizes tabs and newlines to spaces.
- * Processes recursively until no more whitespace normalization is needed.
- *
- * @example
- * ```typescript
- * type Result = NormalizeWhitespace<'hello   world'>; // 'hello world'
- * type Result2 = NormalizeWhitespace<'hello\t\tworld'>; // 'hello world'
- * type Result3 = NormalizeWhitespace<'hello\n\nworld'>; // 'hello world'
- * ```
- */
+/** Collapses runs of whitespace into single spaces and normalizes all whitespace to spaces. */
 export type NormalizeWhitespace<S extends string> = S extends `${infer Before}  ${infer After}`
   ? NormalizeWhitespace<`${Before} ${After}`>
   : S extends `${infer Before}\t${infer After}`

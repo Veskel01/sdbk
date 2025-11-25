@@ -1,12 +1,16 @@
 import type { AccessDuration, BearerTarget, JwtConfig, RecordJwtConfig } from '../statements';
 
 /**
- * Access method definition schema - union of all access types.
+ * Parsed definition of an access method (`DEFINE ACCESS ...`).
+ *
+ * @remarks
+ * This is the schema‑level counterpart of the various `AccessResult` types
+ * and captures the normalized configuration for bearer / jwt / record access.
  */
 export type AccessSchema = BearerAccessSchema | JwtAccessSchema | RecordAccessSchema;
 
 /**
- * Bearer access method schema.
+ * Schema representation of a `TYPE BEARER` access method.
  */
 export interface BearerAccessSchema {
   name: string;
@@ -20,7 +24,7 @@ export interface BearerAccessSchema {
 }
 
 /**
- * JWT access method schema.
+ * Schema representation of a `TYPE JWT` access method.
  */
 export interface JwtAccessSchema {
   name: string;
@@ -34,7 +38,7 @@ export interface JwtAccessSchema {
 }
 
 /**
- * Record access method schema.
+ * Schema representation of a `TYPE RECORD` access method.
  */
 export interface RecordAccessSchema {
   name: string;

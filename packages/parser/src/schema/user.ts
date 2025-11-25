@@ -1,5 +1,5 @@
 /**
- * Duration configuration for user tokens and sessions.
+ * Duration configuration derived from a `DURATION` clause on a user.
  */
 export interface UserDurationSchema {
   /** Token duration */
@@ -9,7 +9,8 @@ export interface UserDurationSchema {
 }
 
 /**
- * User definition schema.
+ * Parsed definition of a SurrealDB user.
+ *
  * @see https://surrealdb.com/docs/surrealql/statements/define/user
  */
 export interface UserSchema {

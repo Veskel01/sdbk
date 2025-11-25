@@ -14,19 +14,17 @@ type ExtractDefineKeyword<S extends string> = Upper<
   : never;
 
 /**
- * Parse statement by dispatching based on keyword lookup.
- * This is significantly faster than nested ternary conditionals
- * and allows for modular extension via interface merging.
+ * Parses a single `DEFINE ...` statement into its strongly typed representation.
  *
- * Returns a parse error if the statement type is unknown or invalid.
+ * @remarks
+ * - Dispatches to the appropriate entry in {@link StatementParsers} based on the `DEFINE <KIND>` keyword.
+ * - Returns a {@link ParseErrors.ParseError} subtype when the input is empty, syntactically invalid, or uses an unknown `DEFINE` kind.
  *
  * @example
- * ```typescript
- * type Result = ParseStatement<'DEFINE TABLE user SCHEMAFULL'>;
- * // Result is TableResult<'user', 'schemafull', ...>
- *
- * type Error = ParseStatement<'DEFINE INVALID user'>;
- * // Error is ParseError<'Unknown DEFINE statement type'>
+ * ```ts
+ * type T1 = ParseStatement<'DEFINE TABLE user SCHEMAFULL'>; // TableResult<'user', ...>
+ * type T2 = ParseStatement<'DEFINE FIELD email ON TABLE user TYPE string'>; // FieldResult<...>
+ * type E  = ParseStatement<'DEFINE INVALID user'>;           // ParseErrors.UnknownStatement
  * ```
  */
 export type ParseStatement<S extends string> = NormalizeWhitespace<Trim<S>> extends ''

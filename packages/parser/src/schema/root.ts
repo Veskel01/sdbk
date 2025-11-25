@@ -13,7 +13,11 @@ import type { TableSchema } from './table';
 import type { UserSchema } from './user';
 
 /**
- * Root schema interface containing all database definitions.
+ * In‑memory view of a fully parsed SurrealDB schema.
+ *
+ * @remarks
+ * This is the final product of {@link BuildSchema}: each map groups definitions
+ * by their logical name (table, index, event, access method, and so on).
  */
 export interface Schema {
   tables: Record<string, TableSchema>;
@@ -31,7 +35,7 @@ export interface Schema {
 }
 
 /**
- * Represents an empty schema with no definitions.
+ * Convenience type for an empty {@link Schema} with all maps initialised to `{}`.
  */
 export type EmptySchema = {
   tables: EmptyObject;

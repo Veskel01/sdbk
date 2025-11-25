@@ -13,17 +13,21 @@ import type {
 } from '../../utils';
 
 /**
- * Result type for parsed DEFINE USER statements.
+ * Result of parsing a `DEFINE USER` statement.
  *
- * @template Name - The username
- * @template Level - root, namespace, or database
- * @template Roles - Array of role names
- * @template HasPassword - Whether PASSWORD clause is present
- * @template HasPasshash - Whether PASSHASH clause is present
- * @template Duration - Token and session duration configuration
- * @template Comment - Optional comment
- * @template Overwrite - Whether OVERWRITE modifier is present
- * @template IfNotExists - Whether IF NOT EXISTS modifier is present
+ * @remarks
+ * This is the type‑level, high‑fidelity representation of a user definition.
+ * It is later projected into {@link UserSchema} when building the database schema.
+ *
+ * @template Name - Username literal as written in the statement.
+ * @template Level - Scope where the user lives (`'root'`, `'namespace'`, or `'database'`).
+ * @template Roles - Resolved role identifiers.
+ * @template HasPassword - Whether a `PASSWORD` clause is present.
+ * @template HasPasshash - Whether a `PASSHASH` clause is present.
+ * @template Duration - Normalized duration information from any `DURATION` clauses.
+ * @template Comment - Attached `COMMENT` text, if any.
+ * @template Overwrite - Whether `OVERWRITE` was used.
+ * @template IfNotExists - Whether `IF NOT EXISTS` was used.
  */
 export interface UserResult<
   Name extends string = string,

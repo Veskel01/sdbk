@@ -15,19 +15,23 @@ import type {
 } from '../../utils';
 
 /**
- * Result type for parsed DEFINE TABLE statements.
+ * Result of parsing a `DEFINE TABLE` statement.
  *
- * @template Name - The table name
- * @template SchemaMode - schemafull, schemaless, or undefined
- * @template TableType - any, normal, or relation
- * @template Drop - Whether DROP modifier is present
- * @template Overwrite - Whether OVERWRITE modifier is present
- * @template IfNotExists - Whether IF NOT EXISTS modifier is present
- * @template AsSelect - The AS SELECT query for views
- * @template Changefeed - Changefeed configuration
- * @template Permissions - Table permissions
- * @template Comment - Optional comment
- * @template RelationCfg - Relation configuration if TYPE RELATION
+ * @remarks
+ * Captures all static information about a table definition that is later
+ * projected into {@link TableSchema} by the schema builder.
+ *
+ * @template Name - Table name identifier.
+ * @template SchemaMode - Schema mode (`'schemafull'` or `'schemaless'`).
+ * @template TableType - Table kind (`'any'`, `'normal'`, or `'relation'`).
+ * @template Drop - Whether the table is created with `DROP` semantics.
+ * @template Overwrite - Whether `OVERWRITE` was used.
+ * @template IfNotExists - Whether `IF NOT EXISTS` was used.
+ * @template AsSelect - `AS SELECT` view body, if this table is a view.
+ * @template Changefeed - Parsed `CHANGEFEED` configuration.
+ * @template Permissions - Table‑level `PERMISSIONS`.
+ * @template Comment - Optional `COMMENT` text.
+ * @template RelationCfg - Relation endpoints when `TYPE RELATION` is used.
  */
 export interface TableResult<
   Name extends string = string,
