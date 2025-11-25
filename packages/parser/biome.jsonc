@@ -3,9 +3,17 @@
   "extends": "//",
   "linter": {
     "rules": {
+      "complexity": {
+        "noBannedTypes": "off"
+      },
       "suspicious": {
         // Any is used for most generic types
-        "noExplicitAny": "off"
+        "noExplicitAny": "off",
+        "noConstEnum": "off"
+      },
+      "style": {
+        "useEnumInitializers": "off",
+        "noNamespace": "off"
       },
       "performance": {
         "noBarrelFile": "off"

@@ -28,6 +28,20 @@
         "typescript": ">=5.0.0",
       },
     },
+    "packages/core-leg": {
+      "name": "@sdbk/core-leg",
+      "version": "0.0.1",
+      "peerDependencies": {
+        "typescript": ">=5.0.0",
+      },
+    },
+    "packages/parser": {
+      "name": "@sdbk/parser",
+      "version": "0.0.1",
+      "peerDependencies": {
+        "typescript": ">=5.0.0",
+      },
+    },
   },
   "packages": {
     "@babel/code-frame": ["@babel/code-frame@7.27.1", "", { "dependencies": { "@babel/helper-validator-identifier": "^7.27.1", "js-tokens": "^4.0.0", "picocolors": "^1.1.1" } }, "sha512-cjQ7ZlQ0Mv3b47hABuTevyTuYN4i+loJKGeV9flcCgIK37cCXRh+L1bd3iBHlynerhQ7BhCkn2BPbQUL+rGqFg=="],
@@ -105,6 +119,10 @@
     "@isaacs/cliui": ["@isaacs/cliui@8.0.2", "", { "dependencies": { "string-width": "^5.1.2", "string-width-cjs": "npm:string-width@^4.2.0", "strip-ansi": "^7.0.1", "strip-ansi-cjs": "npm:strip-ansi@^6.0.1", "wrap-ansi": "^8.1.0", "wrap-ansi-cjs": "npm:wrap-ansi@^7.0.0" } }, "sha512-O8jcjabXaleOG9DQ0+ARXWZBTfnP4WNAqzuiJK7ll44AmxGKv/J2M4TPjxjY3znBCfvBXFzucm1twdyFybFqEA=="],
 
     "@sdbk/core": ["@sdbk/core@workspace:packages/core"],
+
+    "@sdbk/core-leg": ["@sdbk/core-leg@workspace:packages/core-leg"],
+
+    "@sdbk/parser": ["@sdbk/parser@workspace:packages/parser"],
 
     "@trpc/server": ["@trpc/server@11.7.2", "", { "peerDependencies": { "typescript": ">=5.7.2" } }, "sha512-AgB26PXY69sckherIhCacKLY49rxE2XP5h38vr/KMZTbLCL1p8IuIoKPjALTcugC2kbyQ7Lbqo2JDVfRSmPmfQ=="],
 

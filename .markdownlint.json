@@ -1,0 +1,18 @@
+{
+  "default": true,
+  "MD013": {
+    "line_length": 100,
+    "heading_line_length": 100,
+    "code_block_line_length": 100,
+    "code_blocks": true,
+    "tables": true,
+    "headings": true,
+    "headings_with_code": true,
+    "strict": false
+  },
+  "MD033": false,
+  "MD055": {
+    "style": "leading_and_trailing"
+  },
+  "MD056": false
+}
