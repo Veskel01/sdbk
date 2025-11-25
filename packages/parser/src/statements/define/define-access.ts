@@ -1,4 +1,4 @@
-import type { AfterFirstWord, FirstWord, Trim, Upper } from '../../utils';
+import type { AfterFirstWord, ExtractNameAndModifiers, FirstWord, Trim, Upper } from '../../utils';
 
 /**
  * JWT algorithm types supported by SurrealDB.
@@ -154,7 +154,7 @@ type _ParseAccess<S extends string> = S extends `${infer A} ${infer B} ${infer C
     : never
   : never;
 
-type _AccessBody<S extends string> = _ExtractNameAndModifiers<S> extends {
+type _AccessBody<S extends string> = ExtractNameAndModifiers<S> extends {
   name: infer AName extends string;
   rest: infer Rest extends string;
   overwrite: infer OW extends boolean;
@@ -308,35 +308,6 @@ type _ExtractRecordDuration<S extends string> = Upper<S> extends `${string}DURAT
         : undefined;
     }
   : undefined;
-
-/**
- * Extract name and modifiers (OVERWRITE, IF NOT EXISTS).
- */
-type _ExtractNameAndModifiers<S extends string> = Upper<FirstWord<S>> extends 'OVERWRITE'
-  ? {
-      name: FirstWord<AfterFirstWord<S>>;
-      rest: AfterFirstWord<AfterFirstWord<S>>;
-      overwrite: true;
-      ifNotExists: false;
-    }
-  : Upper<S> extends `IF NOT EXISTS ${string}`
-    ? _ExtractAfterIfNotExists<S>
-    : {
-        name: FirstWord<S>;
-        rest: AfterFirstWord<S>;
-        overwrite: false;
-        ifNotExists: false;
-      };
-
-type _ExtractAfterIfNotExists<S extends string> =
-  S extends `${string} ${string} ${string} ${infer Rest}`
-    ? {
-        name: FirstWord<Trim<Rest>>;
-        rest: AfterFirstWord<Trim<Rest>>;
-        overwrite: false;
-        ifNotExists: true;
-      }
-    : never;
 
 /**
  * Extract ON ROOT/NAMESPACE/DATABASE.

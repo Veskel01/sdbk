@@ -1,9 +1,4 @@
-import type {
-  AccessDuration,
-  BearerTarget,
-  JwtConfig,
-  RecordJwtConfig
-} from '../statements/define/define-access';
+import type { AccessDuration, BearerTarget, JwtConfig, RecordJwtConfig } from '../statements';
 
 /**
  * Access method definition schema - union of all access types.

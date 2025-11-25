@@ -1,3 +1,4 @@
+import type { UserDurationSchema } from '../../schema';
 import type {
   AfterFirstWord,
   ExtractComment,
@@ -10,17 +11,6 @@ import type {
   Trim,
   Upper
 } from '../../utils';
-
-/**
- * Duration configuration for user tokens and sessions.
- */
-export interface UserDuration<
-  Token extends string | undefined = string | undefined,
-  Session extends string | undefined = string | undefined
-> {
-  token: Token;
-  session: Session;
-}
 
 /**
  * Result type for parsed DEFINE USER statements.
@@ -41,7 +31,7 @@ export interface UserResult<
   Roles extends string[] = string[],
   HasPassword extends boolean = boolean,
   HasPasshash extends boolean = boolean,
-  Duration extends UserDuration | undefined = undefined,
+  Duration extends UserDurationSchema | undefined = undefined,
   Comment extends string | undefined = undefined,
   Overwrite extends boolean = false,
   IfNotExists extends boolean = false

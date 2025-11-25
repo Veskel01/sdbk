@@ -1,4 +1,4 @@
-import type { Trim, Upper } from '../../utils';
+import type { ExtractComment, Trim, Upper } from '../../utils';
 
 /**
  * Represents a parsed function parameter with name and raw type string.
@@ -88,7 +88,7 @@ type _ParseAfterName<
       Name,
       _QuickParseParams<Params>,
       _ExtractBody<AfterParams>,
-      _ExtractComment<AfterParams>,
+      ExtractComment<AfterParams>,
       _ExtractPerms<AfterParams>,
       OW,
       INE
@@ -145,17 +145,6 @@ type _FindBody<S extends string> = S extends `${infer Body} COMMENT ${string}`
 
 // Ensure body ends with }
 type _EnsureEndsWithBrace<S extends string> = S extends `${string}}` ? S : undefined;
-
-// Extract COMMENT value
-type _ExtractComment<S extends string> = S extends `${string}COMMENT "${infer C}"${string}`
-  ? C
-  : S extends `${string}COMMENT '${infer C}'${string}`
-    ? C
-    : S extends `${string}Comment "${infer C}"${string}`
-      ? C
-      : S extends `${string}comment "${infer C}"${string}`
-        ? C
-        : undefined;
 
 // Extract PERMISSIONS
 type _ExtractPerms<S extends string> = Upper<S> extends `${string}PERMISSIONS FULL${string}`

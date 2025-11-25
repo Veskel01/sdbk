@@ -1,9 +1,10 @@
-import type { ParseDataType, ParseErrors } from '../../parser';
-import type { HasFlexible, HasReadonly } from '../../parser/modifiers';
+import type { HasFlexible, HasReadonly, ParseDataType, ParseErrors } from '../../parser';
+import type { FieldPermissionsSchema, ReferenceConfigSchema } from '../../schema';
 import type {
   AfterFirstWord,
   ExtractComment,
   ExtractExprUntilKeyword,
+  ExtractNameAndModifiers,
   FirstWord,
   IsValidFieldName,
   Trim,
@@ -15,30 +16,6 @@ import type {
  * @see https://surrealdb.com/docs/surrealql/statements/define/field#defining-a-reference
  */
 export type ReferenceOnDelete = 'REJECT' | 'CASCADE' | 'IGNORE' | 'UNSET' | string;
-
-/**
- * Field permissions structure.
- */
-export interface FieldPermissions<
-  Select extends string | undefined = string | undefined,
-  Create extends string | undefined = string | undefined,
-  Update extends string | undefined = string | undefined,
-  Delete extends string | undefined = string | undefined
-> {
-  full: boolean;
-  none: boolean;
-  select: Select;
-  create: Create;
-  update: Update;
-  delete: Delete;
-}
-
-/**
- * Reference configuration for record link fields.
- */
-export interface ReferenceConfig<OnDelete extends string | undefined = string | undefined> {
-  onDelete: OnDelete;
-}
 
 /**
  * Result of parsing a DEFINE FIELD statement.
@@ -57,8 +34,8 @@ export interface FieldResult<
   DefaultAlways extends boolean = false,
   Value extends string | undefined = string | undefined,
   Assert extends string | undefined = string | undefined,
-  Reference extends ReferenceConfig | undefined = ReferenceConfig | undefined,
-  Permissions extends FieldPermissions | undefined = FieldPermissions | undefined,
+  Reference extends ReferenceConfigSchema | undefined = ReferenceConfigSchema | undefined,
+  Permissions extends FieldPermissionsSchema | undefined = FieldPermissionsSchema | undefined,
   Comment extends string | undefined = string | undefined,
   Overwrite extends boolean = false,
   IfNotExists extends boolean = false
@@ -92,7 +69,7 @@ type _ParseField<S extends string> = S extends `${infer A} ${infer B} ${infer C}
     : never
   : never;
 
-type _FieldBody<S extends string> = _ExtractNameAndModifiers<S> extends {
+type _FieldBody<S extends string> = ExtractNameAndModifiers<S> extends {
   name: infer FName extends string;
   rest: infer Rest extends string;
   overwrite: infer OW extends boolean;
@@ -124,32 +101,6 @@ type _FieldBody<S extends string> = _ExtractNameAndModifiers<S> extends {
       : never
     : ParseErrors.InvalidFieldName
   : never;
-
-type _ExtractNameAndModifiers<S extends string> = Upper<FirstWord<S>> extends 'OVERWRITE'
-  ? {
-      name: FirstWord<AfterFirstWord<S>>;
-      rest: AfterFirstWord<AfterFirstWord<S>>;
-      overwrite: true;
-      ifNotExists: false;
-    }
-  : Upper<S> extends `IF NOT EXISTS ${string}`
-    ? _ExtractAfterIfNotExists<S>
-    : {
-        name: FirstWord<S>;
-        rest: AfterFirstWord<S>;
-        overwrite: false;
-        ifNotExists: false;
-      };
-
-type _ExtractAfterIfNotExists<S extends string> =
-  S extends `${string} ${string} ${string} ${infer Rest}`
-    ? {
-        name: FirstWord<Trim<Rest>>;
-        rest: AfterFirstWord<Trim<Rest>>;
-        overwrite: false;
-        ifNotExists: true;
-      }
-    : never;
 
 type _AfterFieldName<S extends string> = Upper<FirstWord<S>> extends 'ON'
   ? Upper<FirstWord<AfterFirstWord<S>>> extends 'TABLE'

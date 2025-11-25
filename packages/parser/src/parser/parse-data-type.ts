@@ -1,5 +1,5 @@
 import type { GeometrySubtype } from '../schema';
-import type { Trim } from '../utils';
+import type { Dec, FirstWord, Inc, Trim, Upper } from '../utils';
 import type { ParseErrors } from './errors';
 import type {
   IsTokenError as _IsTokenError,
@@ -133,10 +133,10 @@ type _OpenBracket<
   Field extends 'angle' | 'brace' | 'bracket' | 'paren'
 > = SplitState<
   `${S['acc']}${C}`,
-  Field extends 'angle' ? _Inc<S['angle']> : S['angle'],
-  Field extends 'brace' ? _Inc<S['brace']> : S['brace'],
-  Field extends 'bracket' ? _Inc<S['bracket']> : S['bracket'],
-  Field extends 'paren' ? _Inc<S['paren']> : S['paren'],
+  Field extends 'angle' ? Inc<S['angle']> : S['angle'],
+  Field extends 'brace' ? Inc<S['brace']> : S['brace'],
+  Field extends 'bracket' ? Inc<S['bracket']> : S['bracket'],
+  Field extends 'paren' ? Inc<S['paren']> : S['paren'],
   false,
   ''
 >;
@@ -148,10 +148,10 @@ type _CloseBracket<
   Field extends 'angle' | 'brace' | 'bracket' | 'paren'
 > = SplitState<
   `${S['acc']}${C}`,
-  Field extends 'angle' ? _Dec<S['angle']> : S['angle'],
-  Field extends 'brace' ? _Dec<S['brace']> : S['brace'],
-  Field extends 'bracket' ? _Dec<S['bracket']> : S['bracket'],
-  Field extends 'paren' ? _Dec<S['paren']> : S['paren'],
+  Field extends 'angle' ? Dec<S['angle']> : S['angle'],
+  Field extends 'brace' ? Dec<S['brace']> : S['brace'],
+  Field extends 'bracket' ? Dec<S['bracket']> : S['bracket'],
+  Field extends 'paren' ? Dec<S['paren']> : S['paren'],
   false,
   ''
 >;
@@ -287,7 +287,7 @@ type _ParseTupleItems<Items extends string[], Depth extends number> = Items exte
   infer First extends string,
   ...infer Rest extends string[]
 ]
-  ? _ParseUnion<Trim<First>, _Inc<Depth>> extends infer T
+  ? _ParseUnion<Trim<First>, Inc<Depth>> extends infer T
     ? _IsTokenError<T> extends true
       ? T
       : [T, ..._ParseTupleItems<Rest, Depth>]
@@ -316,7 +316,7 @@ type _ParseObjectFields<S extends string, Depth extends number> = S extends ''
         infer Type extends string,
         infer Rest extends string
       ]
-    ? { [K in Trim<Key>]: _ParseUnion<Trim<Type>, _Inc<Depth>> } & _ParseObjectFields<Rest, Depth>
+    ? { [K in Trim<Key>]: _ParseUnion<Trim<Type>, Inc<Depth>> } & _ParseObjectFields<Rest, Depth>
     : {};
 
 /** Flatten intersection types into a single object type */
@@ -342,12 +342,6 @@ type _ExtractFieldType<S extends string> = _SplitAt<S, ',', _InitState, 'tuple'>
 // Type Mapping
 // ============================================================================
 
-/** Uppercase helper */
-type Upper<S extends string> = Uppercase<S>;
-
-/** Extract first word from string */
-type FirstWord<S extends string> = S extends `${infer Word} ${string}` ? Word : S;
-
 /**
  * Internal type mapper with depth tracking for recursion prevention.
  * Optimized with early returns for common types.
@@ -371,19 +365,19 @@ type _FastMap<S extends string> = S extends keyof TypeMap ? TypeMap[S] : never;
  * Complex type mapping for generic/parameterized types.
  */
 type _MapComplex<S extends string, Depth extends number> = Upper<S> extends `ARRAY<${string}>`
-  ? _MapType<_Inner<S>, _Inc<Depth>>[]
+  ? _MapType<_Inner<S>, Inc<Depth>>[]
   : Upper<S> extends `ARRAY<${string}>${string}`
-    ? _MapType<_Inner<S>, _Inc<Depth>>[]
+    ? _MapType<_Inner<S>, Inc<Depth>>[]
     : // Set types: set<T> or set<T, N>
       Upper<S> extends `SET<${string}>`
-      ? Set<_MapType<_Inner<S>, _Inc<Depth>>>
+      ? Set<_MapType<_Inner<S>, Inc<Depth>>>
       : Upper<S> extends `SET<${string}>${string}`
-        ? Set<_MapType<_Inner<S>, _Inc<Depth>>>
+        ? Set<_MapType<_Inner<S>, Inc<Depth>>>
         : // Option types: option<T> (nullable)
           Upper<S> extends `OPTION<${string}>`
-          ? _MapType<_Inner<S>, _Inc<Depth>> | null
+          ? _MapType<_Inner<S>, Inc<Depth>> | null
           : Upper<S> extends `OPTION<${string}>${string}`
-            ? _MapType<_Inner<S>, _Inc<Depth>> | null
+            ? _MapType<_Inner<S>, Inc<Depth>> | null
             : // Record types: record<table> or record<table|table2>
               Upper<S> extends `RECORD<${infer Table}>`
               ? _ExtractTableName<Table>
@@ -455,11 +449,11 @@ type _ExtractBalanced<
   Depth extends number
 > = S extends `${infer Char}${infer Rest}`
   ? Char extends '<'
-    ? _ExtractBalanced<Rest, `${Acc}<`, _Inc<Depth>>
+    ? _ExtractBalanced<Rest, `${Acc}<`, Inc<Depth>>
     : Char extends '>'
       ? Depth extends 1
         ? _StripExtraParams<Acc>
-        : _ExtractBalanced<Rest, `${Acc}>`, _Dec<Depth>>
+        : _ExtractBalanced<Rest, `${Acc}>`, Dec<Depth>>
       : _ExtractBalanced<Rest, `${Acc}${Char}`, Depth>
   : Acc;
 
@@ -477,21 +471,15 @@ type _StripAtLevel<
   Depth extends number
 > = S extends `${infer Char}${infer Rest}`
   ? Char extends '<'
-    ? _StripAtLevel<Rest, `${Acc}<`, _Inc<Depth>>
+    ? _StripAtLevel<Rest, `${Acc}<`, Inc<Depth>>
     : Char extends '>'
-      ? _StripAtLevel<Rest, `${Acc}>`, _Dec<Depth>>
+      ? _StripAtLevel<Rest, `${Acc}>`, Dec<Depth>>
       : Char extends ','
         ? Depth extends 0
           ? Trim<Acc>
           : _StripAtLevel<Rest, `${Acc},`, Depth>
         : _StripAtLevel<Rest, `${Acc}${Char}`, Depth>
   : Trim<Acc>;
-
-/** Increment depth counter (max 10) */
-type _Inc<N extends number> = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 10][N];
-
-/** Decrement depth counter (min 0) */
-type _Dec<N extends number> = [0, 0, 1, 2, 3, 4, 5, 6, 7, 8, 9][N];
 
 /** Maps type name to TypeMap entry, returns `unknown` for unrecognized types */
 type _Map<T extends string> = T extends keyof TypeMap ? TypeMap[T] : unknown;

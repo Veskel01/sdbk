@@ -1,4 +1,9 @@
-import type { ParseErrors } from '../../parser/errors';
+import type { ParseErrors } from '../../parser';
+import type {
+  ChangefeedConfigSchema,
+  RelationConfigSchema,
+  TablePermissionsSchema
+} from '../../schema';
 import type {
   ExtractComment,
   FirstWord,
@@ -8,42 +13,6 @@ import type {
   Trim,
   Upper
 } from '../../utils';
-
-/**
- * Table permissions schema.
- */
-export interface TablePermissions {
-  full: boolean;
-  none: boolean;
-  select: string | undefined;
-  create: string | undefined;
-  update: string | undefined;
-  delete: string | undefined;
-}
-
-/**
- * Relation type configuration.
- */
-export interface RelationConfig<
-  From extends string | undefined = string | undefined,
-  To extends string | undefined = string | undefined,
-  Enforced extends boolean = boolean
-> {
-  from: From;
-  to: To;
-  enforced: Enforced;
-}
-
-/**
- * Changefeed configuration.
- */
-export interface ChangefeedConfig<
-  Duration extends string | undefined = string | undefined,
-  IncludeOriginal extends boolean = boolean
-> {
-  duration: Duration;
-  includeOriginal: IncludeOriginal;
-}
 
 /**
  * Result type for parsed DEFINE TABLE statements.
@@ -68,10 +37,10 @@ export interface TableResult<
   Overwrite extends boolean = false,
   IfNotExists extends boolean = false,
   AsSelect extends string | undefined = undefined,
-  Changefeed extends ChangefeedConfig | undefined = undefined,
-  Permissions extends TablePermissions | undefined = undefined,
+  Changefeed extends ChangefeedConfigSchema | undefined = undefined,
+  Permissions extends TablePermissionsSchema | undefined = undefined,
   Comment extends string | undefined = undefined,
-  RelationCfg extends RelationConfig | undefined = undefined
+  RelationCfg extends RelationConfigSchema | undefined = undefined
 > {
   kind: 'table';
   name: Name;

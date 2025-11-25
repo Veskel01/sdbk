@@ -1,3 +1,4 @@
+import type { HnswConfig } from '../../schema';
 import type {
   AfterFirstWord,
   ExtractComment,
@@ -20,7 +21,7 @@ import type {
  * @template Analyzer - Analyzer name for FULLTEXT indexes
  * @template Comment - Optional comment
  * @template Concurrently - Whether CONCURRENTLY modifier is present
- * @template HnswConfig - HNSW configuration (dimension, type, dist, efc, m)
+ * @template HnswCfg - HNSW configuration (dimension, type, dist, efc, m)
  */
 export interface IndexResult<
   Name extends string = string,
@@ -33,7 +34,7 @@ export interface IndexResult<
   Analyzer extends string | undefined = undefined,
   Comment extends string | undefined = undefined,
   Concurrently extends boolean = false,
-  HnswConfig extends HnswConfigType | undefined = undefined
+  HnswCfg extends HnswConfig | undefined = undefined
 > {
   kind: 'index';
   name: Name;
@@ -46,18 +47,7 @@ export interface IndexResult<
   analyzer: Analyzer;
   comment: Comment;
   concurrently: Concurrently;
-  hnswConfig: HnswConfig;
-}
-
-/**
- * HNSW configuration type.
- */
-export interface HnswConfigType {
-  dimension: number | undefined;
-  type: 'F64' | 'F32' | 'I64' | 'I32' | 'I16' | undefined;
-  dist: 'EUCLIDEAN' | 'COSINE' | 'MANHATTAN' | 'MINKOWSKI' | undefined;
-  efc: number | undefined;
-  m: number | undefined;
+  hnswConfig: HnswCfg;
 }
 
 export type ParseDefineIndex<S extends string> = _ParseIndex<Trim<S>>;

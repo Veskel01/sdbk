@@ -1,4 +1,56 @@
-import type { FirstWord, Trim } from './string';
+import type { AfterFirstWord, FirstWord, Trim, Upper } from './string';
+
+/**
+ * Result type for ExtractNameAndModifiers.
+ */
+export interface NameAndModifiers<
+  Name extends string = string,
+  Rest extends string = string,
+  Overwrite extends boolean = boolean,
+  IfNotExists extends boolean = boolean
+> {
+  name: Name;
+  rest: Rest;
+  overwrite: Overwrite;
+  ifNotExists: IfNotExists;
+}
+
+/**
+ * Extract name and modifiers (OVERWRITE, IF NOT EXISTS) from a statement body.
+ * This is a common pattern used in DEFINE statements.
+ *
+ * @example
+ * ```typescript
+ * type Result = ExtractNameAndModifiers<'OVERWRITE myTable SCHEMAFULL'>;
+ * // { name: 'myTable', rest: 'SCHEMAFULL', overwrite: true, ifNotExists: false }
+ *
+ * type Result2 = ExtractNameAndModifiers<'IF NOT EXISTS myField ON TABLE user'>;
+ * // { name: 'myField', rest: 'ON TABLE user', overwrite: false, ifNotExists: true }
+ *
+ * type Result3 = ExtractNameAndModifiers<'myIndex ON user'>;
+ * // { name: 'myIndex', rest: 'ON user', overwrite: false, ifNotExists: false }
+ * ```
+ */
+export type ExtractNameAndModifiers<S extends string> = Upper<FirstWord<S>> extends 'OVERWRITE'
+  ? NameAndModifiers<FirstWord<AfterFirstWord<S>>, AfterFirstWord<AfterFirstWord<S>>, true, false>
+  : Upper<S> extends `IF NOT EXISTS ${string}`
+    ? ExtractAfterIfNotExists<S>
+    : NameAndModifiers<FirstWord<S>, AfterFirstWord<S>, false, false>;
+
+/**
+ * Helper to extract name and rest after IF NOT EXISTS modifier.
+ * Skips the 3 words "IF", "NOT", "EXISTS" and extracts the name from the rest.
+ *
+ * @example
+ * ```typescript
+ * type Result = ExtractAfterIfNotExists<'IF NOT EXISTS myField ON TABLE user'>;
+ * // { name: 'myField', rest: 'ON TABLE user', overwrite: false, ifNotExists: true }
+ * ```
+ */
+export type ExtractAfterIfNotExists<S extends string> =
+  S extends `${string} ${string} ${string} ${infer Rest}`
+    ? NameAndModifiers<FirstWord<Trim<Rest>>, AfterFirstWord<Trim<Rest>>, false, true>
+    : never;
 
 /**
  * Skip OVERWRITE modifier and return the rest of the string.

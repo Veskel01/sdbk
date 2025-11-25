@@ -1,4 +1,11 @@
-import type { AfterFirstWord, ExtractComment, FirstWord, Trim, Upper } from '../../utils';
+import type {
+  AfterFirstWord,
+  ExtractComment,
+  ExtractNameAndModifiers,
+  FirstWord,
+  Trim,
+  Upper
+} from '../../utils';
 
 /**
  * Result of parsing a DEFINE EVENT statement.
@@ -33,7 +40,7 @@ type _ParseEvent<S extends string> = S extends `${infer A} ${infer B} ${infer C}
     : never
   : never;
 
-type _EventBody<S extends string> = _ExtractNameAndModifiers<S> extends {
+type _EventBody<S extends string> = ExtractNameAndModifiers<S> extends {
   name: infer EName extends string;
   rest: infer Rest extends string;
   overwrite: infer OW extends boolean;
@@ -54,32 +61,6 @@ type _EventBody<S extends string> = _ExtractNameAndModifiers<S> extends {
       >
     : never
   : never;
-
-type _ExtractNameAndModifiers<S extends string> = Upper<FirstWord<S>> extends 'OVERWRITE'
-  ? {
-      name: FirstWord<AfterFirstWord<S>>;
-      rest: AfterFirstWord<AfterFirstWord<S>>;
-      overwrite: true;
-      ifNotExists: false;
-    }
-  : Upper<S> extends `IF NOT EXISTS ${string}`
-    ? _ExtractAfterIfNotExists<S>
-    : {
-        name: FirstWord<S>;
-        rest: AfterFirstWord<S>;
-        overwrite: false;
-        ifNotExists: false;
-      };
-
-type _ExtractAfterIfNotExists<S extends string> =
-  S extends `${string} ${string} ${string} ${infer Rest}`
-    ? {
-        name: FirstWord<Trim<Rest>>;
-        rest: AfterFirstWord<Trim<Rest>>;
-        overwrite: false;
-        ifNotExists: true;
-      }
-    : never;
 
 type _ExtractTable<S extends string> = Upper<FirstWord<S>> extends 'ON'
   ? _ExtractTableName<AfterFirstWord<S>>
