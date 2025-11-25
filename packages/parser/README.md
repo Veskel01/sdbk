@@ -476,5 +476,3 @@ guidelines.
 ## License
 
 MIT © [Jakub Andrzejewski (Veskel01)](https://github.com/veskel01)
-
----
