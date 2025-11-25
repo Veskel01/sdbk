@@ -24,7 +24,7 @@ parsing happens at the type level.
   - [API Reference](#api-reference)
     - [ParseSchema](#parseschema)
     - [ParseStatement](#parsestatement)
-    - [ParseType](#parsetype)
+    - [ParseDataType](#parsedatatype)
     - [SplitStatements](#splitstatements)
   - [Schema Structure](#schema-structure)
     - [Table Schema](#table-schema)
@@ -204,19 +204,19 @@ type FieldResult = ParseStatement<'DEFINE FIELD email ON user TYPE string'>;
 // { kind: 'field'; name: 'email'; table: 'user'; type: string; ... }
 ```
 
-### ParseType
+### ParseDataType
 
 Parse a SurrealQL type string into its TypeScript equivalent.
 
 ```typescript
-import type { ParseType } from '@sdbk/parser';
+import type { ParseDataType } from '@sdbk/parser';
 
-type StringType = ParseType<'string'>;           // string
-type ArrayType = ParseType<'array<int>'>;        // number[]
-type OptionType = ParseType<'option<string>'>;   // string | null
-type RecordType = ParseType<'record<user>'>;     // RecordId<'user'>
-type UnionRecord = ParseType<'record<user|post>'>; // RecordId<'user'> | RecordId<'post'>
-type NestedType = ParseType<'array<option<string>>'>; // (string | null)[]
+type StringType = ParseDataType<'string'>;           // string
+type ArrayType = ParseDataType<'array<int>'>;        // number[]
+type OptionType = ParseDataType<'option<string>'>;   // string | null
+type RecordType = ParseDataType<'record<user>'>;     // RecordId<'user'>
+type UnionRecord = ParseDataType<'record<user|post>'>; // RecordId<'user'> | RecordId<'post'>
+type NestedType = ParseDataType<'array<option<string>>'>; // (string | null)[]
 ```
 
 ### SplitStatements

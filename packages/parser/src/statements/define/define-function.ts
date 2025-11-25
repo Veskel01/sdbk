@@ -110,7 +110,7 @@ type _QuickParseParams<S extends string> = Trim<S> extends ''
           : [_ParseParam<Trim<S>>];
 
 // Parse single parameter: $name: type
-// Stores type as string to avoid deep recursion from ParseType
+// Stores type as string to avoid deep recursion from ParseDataType
 type _ParseParam<S extends string> = Trim<S> extends ''
   ? FunctionParam<'', ''>
   : Trim<S> extends `$${infer Name}: ${infer Type}`

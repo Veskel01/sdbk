@@ -24,6 +24,9 @@
     "packages/core": {
       "name": "@sdbk/core",
       "version": "0.0.1",
+      "devDependencies": {
+        "@sdbk/parser": "workspace:*",
+      },
       "peerDependencies": {
         "typescript": ">=5.0.0",
       },

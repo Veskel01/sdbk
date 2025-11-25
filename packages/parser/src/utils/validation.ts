@@ -33,7 +33,6 @@ type _ContainsInvalidTableChars<S extends string> = S extends `${string} ${strin
 
 /**
  * Checks if a string contains invalid characters for field names.
- * Note: Dots (.) are ALLOWED for nested fields like `emails.address`.
  */
 type _ContainsInvalidFieldChars<S extends string> = S extends `${string} ${string}`
   ? true
@@ -79,6 +78,7 @@ export type IsValidTableName<S extends string> = Trim<S> extends ''
  * - Must not start with a digit
  * - Must not contain spaces or special SQL characters
  * - Dots (.) ARE allowed for nested fields (e.g., `emails.address`)
+ * - Asterisks (*) ARE allowed for wildcard array paths (e.g., `addresses.*.city`)
  *
  * @typeParam S - The field name to validate
  */

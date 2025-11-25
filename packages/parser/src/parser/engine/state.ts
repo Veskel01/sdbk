@@ -1,4 +1,4 @@
-import type { Add1, Sub1, Trim } from '../../utils';
+import type { Dec, Inc, Trim } from '../../utils';
 
 /**
  * Parser state machine for splitting SurrealQL statements.
@@ -56,7 +56,7 @@ export declare namespace State {
     input: Rest;
     scanned: UpdateScanned<S, '{'>;
     statements: S['statements'];
-    depth: S['depth'] extends number ? Add1<S['depth']> : 1;
+    depth: S['depth'] extends number ? Inc<S['depth']> : 1;
     current: `${S['current']}{`;
   };
 
@@ -67,7 +67,7 @@ export declare namespace State {
     input: Rest;
     scanned: UpdateScanned<S, '}'>;
     statements: S['statements'];
-    depth: S['depth'] extends number ? Sub1<S['depth']> : 0;
+    depth: S['depth'] extends number ? Dec<S['depth']> : 0;
     current: `${S['current']}}`;
   };
 

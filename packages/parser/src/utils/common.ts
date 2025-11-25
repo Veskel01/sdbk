@@ -1,9 +1,5 @@
 import type { FirstWord, Trim } from './string';
 
-// =============================================================================
-// MODIFIER EXTRACTION
-// =============================================================================
-
 /**
  * Skip OVERWRITE modifier and return the rest of the string.
  *
@@ -90,10 +86,6 @@ export type ExtractComment<S extends string> = S extends `${string}COMMENT "${in
                         ? C
                         : undefined;
 
-// =============================================================================
-// QUOTED STRING PARSING
-// =============================================================================
-
 /**
  * Parse a quoted string value.
  * Handles double quotes, single quotes, and file pointers (f"...").
@@ -118,10 +110,6 @@ export type ParseQuotedString<S extends string> = S extends `"${infer Content}"$
             ? Content
             : FirstWord<S>;
 
-// =============================================================================
-// DURATION EXTRACTION
-// =============================================================================
-
 /**
  * Extract a duration value from a string.
  * Stops at space or comma.
@@ -137,22 +125,6 @@ export type ExtractDuration<S extends string> = S extends `${infer D},${string}`
   : S extends `${infer D} ${string}`
     ? Trim<D>
     : Trim<S>;
-
-// =============================================================================
-// PERMISSIONS EXTRACTION
-// =============================================================================
-
-/**
- * Common permissions result type.
- */
-export interface PermissionsResult {
-  full: boolean;
-  none: boolean;
-  select: string | undefined;
-  create: string | undefined;
-  update: string | undefined;
-  delete: string | undefined;
-}
 
 /**
  * Check if string has PERMISSIONS NONE.
@@ -191,10 +163,6 @@ type _TrimPermissionCondition<S extends string> = S extends `${infer C} COMMENT 
     ? Trim<C>
     : Trim<S>;
 
-// =============================================================================
-// KEYWORD DETECTION
-// =============================================================================
-
 /**
  * Check if a word is a common statement keyword (case-insensitive).
  */
@@ -205,10 +173,6 @@ export type IsCommonKeyword<W extends string> = Uppercase<W> extends
   | 'CONCURRENTLY'
   ? true
   : false;
-
-// =============================================================================
-// VALUE EXTRACTION
-// =============================================================================
 
 /**
  * Extract value until a common keyword is found.

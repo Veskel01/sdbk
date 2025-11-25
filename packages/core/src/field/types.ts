@@ -1,6 +1,6 @@
+import type { ParseDataType } from '@sdbk/parser';
 import type { SurrealQL } from '../expression';
-import type { ParseFieldType } from '../types';
-import type { If, Simplify } from '../types/utility';
+import type { If, Simplify } from '../types';
 
 export type FieldPermission = 'NONE' | 'FULL' | (string & {});
 
@@ -13,12 +13,12 @@ export interface FieldPermissions {
 export type OnDeleteBehavior = 'REJECT' | 'CASCADE' | 'IGNORE' | 'UNSET' | `THEN ${string}`;
 
 export interface $Field<
-  TType extends string = string,
-  TValue = unknown,
+  TDataType extends string = string,
+  TValue = ParseDataType<TDataType>,
   TOptional extends boolean = boolean,
   TReadonly extends boolean = boolean
 > {
-  readonly _type: TType;
+  readonly _dataType: TDataType;
   readonly _value: TValue;
   readonly _optional: TOptional;
   readonly _readonly: TReadonly;
@@ -33,8 +33,8 @@ export type ValueExpr<T = unknown> = string | SurrealQL<T>;
 export type AssertExpr = string | SurrealQL<boolean>;
 export type ComputedExpr<T = unknown> = string | SurrealQL<T>;
 
-export interface RegularFieldConfig<TType extends string = string> {
-  readonly type: TType;
+export interface RegularFieldConfig<TDataType extends string> {
+  readonly dataType: TDataType;
   readonly flexible?: boolean;
   readonly readonly?: boolean;
   readonly default?: string;
@@ -46,8 +46,11 @@ export interface RegularFieldConfig<TType extends string = string> {
   readonly comment?: string;
 }
 
-export interface RegularFieldBuilderConfig<TType extends string = string, TValue = unknown> {
-  readonly type: TType;
+export interface RegularFieldBuilderConfig<
+  TDataType extends string = string,
+  TValue = ParseDataType<TDataType>
+> {
+  readonly dataType: TDataType;
   readonly flexible?: boolean;
   readonly readonly?: boolean;
   readonly default?: DefaultExpr<TValue>;
@@ -59,16 +62,19 @@ export interface RegularFieldBuilderConfig<TType extends string = string, TValue
   readonly comment?: string;
 }
 
-export interface ComputedFieldConfig<TType extends string = string> {
+export interface ComputedFieldConfig<TDataType extends string> {
   readonly expression: string;
-  readonly type?: TType;
+  readonly dataType?: TDataType;
   readonly permissions?: FieldPermissions;
   readonly comment?: string;
 }
 
-export interface ComputedFieldBuilderConfig<TType extends string = string, TValue = unknown> {
+export interface ComputedFieldBuilderConfig<
+  TDataType extends string,
+  TValue = ParseDataType<TDataType>
+> {
   readonly expression: ComputedExpr<TValue>;
-  readonly type?: TType;
+  readonly dataType?: TDataType;
   readonly permissions?: FieldPermissions;
   readonly comment?: string;
 }
@@ -91,6 +97,6 @@ export type InferFieldType<S extends Record<string, { readonly _: $Field }>> = S
 
 export type FieldValue<TType extends string, TOptional extends boolean> = If<
   TOptional,
-  ParseFieldType<TType> | null,
-  ParseFieldType<TType>
+  ParseDataType<TType> | null,
+  ParseDataType<TType>
 >;

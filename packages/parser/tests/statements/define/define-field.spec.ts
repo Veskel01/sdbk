@@ -443,5 +443,160 @@ describe('DEFINE FIELD', () => {
 
       expectTypeOf<schema['tables']['user']['fields']['name']['name']>().toEqualTypeOf<'name'>();
     });
+
+    it('handles nested field names with dots', () => {
+      type schema = ParseSchema<`
+        DEFINE TABLE user;
+        DEFINE FIELD time.created_at ON user TYPE datetime
+      `>;
+
+      expectTypeOf<
+        schema['tables']['user']['fields']['time.created_at']['name']
+      >().toEqualTypeOf<'time.created_at'>();
+      expectTypeOf<
+        schema['tables']['user']['fields']['time.created_at']['type']
+      >().toEqualTypeOf<Date>();
+    });
+
+    it('handles wildcard field names for array elements', () => {
+      type schema = ParseSchema<`
+        DEFINE TABLE address_history;
+        DEFINE FIELD addresses ON address_history TYPE array<object>;
+        DEFINE FIELD addresses.*.city ON address_history TYPE string;
+        DEFINE FIELD addresses.*.coordinates ON address_history TYPE geometry<point>
+      `>;
+
+      expectTypeOf<
+        schema['tables']['address_history']['fields']['addresses.*.city']['name']
+      >().toEqualTypeOf<'addresses.*.city'>();
+      expectTypeOf<
+        schema['tables']['address_history']['fields']['addresses.*.city']['type']
+      >().toEqualTypeOf<string>();
+      expectTypeOf<
+        schema['tables']['address_history']['fields']['addresses.*.coordinates']['name']
+      >().toEqualTypeOf<'addresses.*.coordinates'>();
+      expectTypeOf<
+        schema['tables']['address_history']['fields']['addresses.*.coordinates']['type']
+      >().toExtend<{ type: 'Point'; coordinates: [number, number] }>();
+    });
+  });
+
+  describe('Literal types', () => {
+    it('parses field with number literal union', () => {
+      type schema = ParseSchema<`
+        DEFINE TABLE user;
+        DEFINE FIELD level ON user TYPE 1 | 2 | 3
+      `>;
+
+      expectTypeOf<schema['tables']['user']['fields']['level']['type']>().toEqualTypeOf<
+        1 | 2 | 3
+      >();
+      expectTypeOf<
+        schema['tables']['user']['fields']['level']['dataType']
+      >().toEqualTypeOf<'1 | 2 | 3'>();
+    });
+
+    it('parses field with string literal union', () => {
+      type schema = ParseSchema<`
+        DEFINE TABLE user;
+        DEFINE FIELD status ON user TYPE "active" | "inactive" | "pending"
+      `>;
+
+      expectTypeOf<schema['tables']['user']['fields']['status']['type']>().toEqualTypeOf<
+        'active' | 'inactive' | 'pending'
+      >();
+    });
+
+    it('parses field with mixed literal union', () => {
+      type schema = ParseSchema<`
+        DEFINE TABLE user;
+        DEFINE FIELD content ON user TYPE 9 | "9" | "nine"
+      `>;
+
+      expectTypeOf<schema['tables']['user']['fields']['content']['type']>().toEqualTypeOf<
+        9 | '9' | 'nine'
+      >();
+    });
+
+    it('parses field with type and literal union', () => {
+      type schema = ParseSchema<`
+        DEFINE TABLE user;
+        DEFINE FIELD value ON user TYPE datetime | uuid | "N/A"
+      `>;
+
+      expectTypeOf<schema['tables']['user']['fields']['value']['type']>().toEqualTypeOf<
+        Date | string | 'N/A'
+      >();
+    });
+
+    it('parses field with object literal', () => {
+      type schema = ParseSchema<`
+        DEFINE TABLE user;
+        DEFINE FIELD config ON user TYPE { enabled: bool, name: string }
+      `>;
+
+      expectTypeOf<schema['tables']['user']['fields']['config']['type']>().toEqualTypeOf<{
+        enabled: boolean;
+        name: string;
+      }>();
+    });
+
+    it('parses field with union of object literals', () => {
+      type schema = ParseSchema<`
+        DEFINE TABLE user;
+        DEFINE FIELD result ON user TYPE { ok: bool } | { error: string }
+      `>;
+
+      expectTypeOf<schema['tables']['user']['fields']['result']['type']>().toEqualTypeOf<
+        { ok: boolean } | { error: string }
+      >();
+    });
+
+    it('parses multi-line object literal union (SurrealDB error_info pattern)', () => {
+      type schema = ParseSchema<`
+        DEFINE TABLE information;
+        DEFINE FIELD error_info ON information TYPE
+          { Continue: { message: string }} |
+          { Retry: { after: duration }} |
+          { Deprecated: { message: string }}
+      `>;
+
+      type ErrorInfo = schema['tables']['information']['fields']['error_info']['type'];
+      expectTypeOf<ErrorInfo>().toExtend<
+        | { Continue: { message: string } }
+        | { Retry: { after: string } }
+        | { Deprecated: { message: string } }
+      >();
+    });
+
+    it('parses multi-line TYPE with tabs (exact user case)', () => {
+      type schema = ParseSchema<`
+        DEFINE TABLE user SCHEMAFULL;
+        DEFINE FIELD error_info ON TABLE user TYPE
+	{ Continue:    { message: "" }} |
+	{ Retry: { error: "Retrying", after: duration }} |
+	{ Deprecated:  { message: string }};
+      `>;
+
+      type ErrorInfo = schema['tables']['user']['fields']['error_info'];
+
+      // Check dataType is extracted
+      expectTypeOf<ErrorInfo['dataType']>().not.toEqualTypeOf<undefined>();
+
+      // Check type is not unknown
+      expectTypeOf<ErrorInfo['type']>().not.toEqualTypeOf<unknown>();
+    });
+
+    it('parses object literal with nested types', () => {
+      type schema = ParseSchema<`
+        DEFINE TABLE user;
+        DEFINE FIELD meta ON user TYPE { tags: array<string>, owner: record<user> }
+      `>;
+
+      expectTypeOf<schema['tables']['user']['fields']['meta']['type']>().toExtend<{
+        tags: string[];
+        owner: { readonly __table: 'user'; readonly __id: string };
+      }>();
+    });
   });
 });

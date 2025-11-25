@@ -1,81 +1,85 @@
-import { ENTITY_KIND } from '../entity';
-import type { SurrealQL } from '../expression';
-import type { ParseFieldType } from '../types';
-import { ComputedField } from './field';
-import type {
-  $Field,
-  ComputedExpr,
-  ComputedFieldBuilderConfig,
-  FieldPermissions,
-  TableRef
-} from './types';
+// import type { DataType, ParseDataType } from '@sdbk/parser';
+// import { ENTITY_KIND } from '../entity';
+// import type { SurrealQL } from '../expression';
+// import { ComputedField } from './field';
+// import type {
+//   $Field,
+//   ComputedExpr,
+//   ComputedFieldBuilderConfig,
+//   FieldPermissions,
+//   TableRef
+// } from './types';
 
-function exprToString<T>(expr: string | SurrealQL<T>): string {
-  if (typeof expr === 'string') {
-    return expr;
-  }
-  return expr.toQuery().query;
-}
+// TODO - to be removed
 
-export class ComputedFieldBuilder<TType extends string = 'any', TValue = ParseFieldType<TType>> {
-  public static readonly [ENTITY_KIND]: string = 'ComputedFieldBuilder';
+// function exprToString<T>(expr: string | SurrealQL<T>): string {
+//   if (typeof expr === 'string') {
+//     return expr;
+//   }
+//   return expr.toQuery().query;
+// }
 
-  public declare readonly _: $Field<TType, TValue, false>;
+// export class ComputedFieldBuilder<
+//   TDataType extends string = string,
+//   TValue = ParseDataType<TDataType>
+// > {
+//   public static readonly [ENTITY_KIND]: string = 'ComputedFieldBuilder';
 
-  private readonly config: ComputedFieldBuilderConfig<TType, TValue>;
+//   public declare readonly _: $Field<TDataType, TValue, false>;
 
-  public constructor(
-    expression: ComputedExpr<TValue>,
-    config?: Partial<Omit<ComputedFieldBuilderConfig<TType, TValue>, 'expression'>>
-  ) {
-    this.config = { expression, ...config };
-  }
+//   private readonly config: ComputedFieldBuilderConfig<TDataType, TValue>;
 
-  public get dbType(): TType {
-    return (this.config.type ?? 'any') as TType;
-  }
+//   public constructor(
+//     expression: ComputedExpr<TValue>,
+//     config?: Partial<Omit<ComputedFieldBuilderConfig<TDataType, TValue>, 'expression'>>
+//   ) {
+//     this.config = { expression, ...config };
+//   }
 
-  public get expression(): ComputedExpr<TValue> {
-    return this.config.expression;
-  }
+//   public get expression(): ComputedExpr<TValue> {
+//     return this.config.expression;
+//   }
 
-  public build<TTable extends TableRef>(table: TTable, name: string): ComputedField<TType, TValue> {
-    return new ComputedField<TType, TValue>(table, name, {
-      type: this.config.type,
-      permissions: this.config.permissions,
-      comment: this.config.comment,
-      expression: exprToString(this.config.expression)
-    });
-  }
+//   public build<TTable extends TableRef>(
+//     table: TTable,
+//     name: string
+//   ): ComputedField<TDataType, TValue> {
+//     return new ComputedField<TDataType, TValue>(table, name, {
+//       dataType: this.config.dataType,
+//       permissions: this.config.permissions,
+//       comment: this.config.comment,
+//       expression: exprToString(this.config.expression)
+//     });
+//   }
 
-  public type<TNewType extends string>(
-    typeString: TNewType
-  ): ComputedFieldBuilder<TNewType, ParseFieldType<TNewType>> {
-    return new ComputedFieldBuilder<TNewType, ParseFieldType<TNewType>>(
-      exprToString(this.config.expression),
-      {
-        type: typeString,
-        permissions: this.config.permissions,
-        comment: this.config.comment
-      }
-    );
-  }
+//   public type<TNewType extends DataType>(
+//     typeString: TNewType
+//   ): ComputedFieldBuilder<TNewType, ParseDataType<TNewType>> {
+//     return new ComputedFieldBuilder<TNewType, ParseDataType<TNewType>>(
+//       exprToString(this.config.expression),
+//       {
+//         dataType: typeString,
+//         permissions: this.config.permissions,
+//         comment: this.config.comment
+//       }
+//     );
+//   }
 
-  public $type<TNewValue>(): ComputedFieldBuilder<TType, TNewValue> {
-    return this as unknown as ComputedFieldBuilder<TType, TNewValue>;
-  }
+//   public $type<TNewValue>(): ComputedFieldBuilder<TDataType, TNewValue> {
+//     return this as unknown as ComputedFieldBuilder<TDataType, TNewValue>;
+//   }
 
-  public permissions(perms: FieldPermissions): ComputedFieldBuilder<TType, TValue> {
-    return new ComputedFieldBuilder<TType, TValue>(this.config.expression, {
-      ...this.config,
-      permissions: perms
-    });
-  }
+//   public permissions(perms: FieldPermissions): ComputedFieldBuilder<TDataType, TValue> {
+//     return new ComputedFieldBuilder<TDataType, TValue>(this.config.expression, {
+//       ...this.config,
+//       permissions: perms
+//     });
+//   }
 
-  public comment(text: string): ComputedFieldBuilder<TType, TValue> {
-    return new ComputedFieldBuilder<TType, TValue>(this.config.expression, {
-      ...this.config,
-      comment: text
-    });
-  }
-}
+//   public comment(text: string): ComputedFieldBuilder<TDataType, TValue> {
+//     return new ComputedFieldBuilder<TDataType, TValue>(this.config.expression, {
+//       ...this.config,
+//       comment: text
+//     });
+//   }
+// }

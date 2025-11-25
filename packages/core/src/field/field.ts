@@ -1,241 +1,244 @@
-import { ENTITY_KIND } from '../entity';
-import { Identifier, type SQLConvertible, type SurrealQL, surql } from '../expression';
-import type { ParseFieldType } from '../types';
-import type {
-  $Field,
-  ComputedFieldConfig,
-  FieldPermission,
-  FieldPermissions,
-  OnDeleteBehavior,
-  RegularFieldConfig,
-  TableRef
-} from './types';
+// import type { ParseDataType } from '@sdbk/parser';
+// import { ENTITY_KIND } from '../entity';
+// import { Identifier, type SQLConvertible, type SurrealQL, surql } from '../expression';
+// import type {
+//   $Field,
+//   ComputedFieldConfig,
+//   FieldPermission,
+//   FieldPermissions,
+//   OnDeleteBehavior,
+//   RegularFieldConfig,
+//   TableRef
+// } from './types';
 
-export abstract class Field<
-  TType extends string = string,
-  TValue = unknown,
-  TOptional extends boolean = false
-> implements SQLConvertible<TValue>
-{
-  public static readonly [ENTITY_KIND]: string = 'Field';
+// TODO - to be removed
 
-  public declare readonly _: $Field<TType, TValue, TOptional>;
+// export abstract class Field<
+//   TDataType extends string = string,
+//   TValue = ParseDataType<TDataType>,
+//   TOptional extends boolean = false
+// > implements SQLConvertible<TValue>
+// {
+//   public static readonly [ENTITY_KIND]: string = 'Field';
 
-  public readonly table: TableRef;
-  public readonly name: string;
+//   public declare readonly _: $Field<TDataType, TValue, TOptional>;
 
-  protected constructor(table: TableRef, name: string) {
-    this.table = table;
-    this.name = name;
-  }
+//   public readonly table: TableRef;
+//   public readonly name: string;
 
-  public abstract get dbType(): TType;
-  public abstract get isOptional(): TOptional;
-  public abstract get permissions(): FieldPermissions | undefined;
-  public abstract get comment(): string | undefined;
+//   protected constructor(table: TableRef, name: string) {
+//     this.table = table;
+//     this.name = name;
+//   }
 
-  public toSurrealQL(): SurrealQL<TValue> {
-    const parts: SurrealQL[] = [];
-    parts.push(this.buildDefineClause());
-    parts.push(...this.buildSpecificClauses());
+//   public abstract get dataType(): TDataType;
+//   public abstract get isOptional(): TOptional;
+//   public abstract get permissions(): FieldPermissions | undefined;
+//   public abstract get comment(): string | undefined;
 
-    const permsClause = this.buildPermissionsClause();
-    if (permsClause) {
-      parts.push(permsClause);
-    }
+//   public toSurrealQL(): SurrealQL<TValue> {
+//     const parts: SurrealQL[] = [];
+//     parts.push(this.buildDefineClause());
+//     parts.push(...this.buildSpecificClauses());
 
-    const commentClause = this.buildCommentClause();
-    if (commentClause) {
-      parts.push(commentClause);
-    }
+//     const permsClause = this.buildPermissionsClause();
+//     if (permsClause) {
+//       parts.push(permsClause);
+//     }
 
-    return surql.join(parts, surql.raw('')) as SurrealQL<TValue>;
-  }
+//     const commentClause = this.buildCommentClause();
+//     if (commentClause) {
+//       parts.push(commentClause);
+//     }
 
-  protected abstract buildSpecificClauses(): SurrealQL[];
+//     return surql.join(parts, surql.raw('')) as SurrealQL<TValue>;
+//   }
 
-  protected buildDefineClause(): SurrealQL {
-    return surql`DEFINE FIELD ${new Identifier(this.name)} ON TABLE ${new Identifier(this.table.tableName)}`;
-  }
+//   protected abstract buildSpecificClauses(): SurrealQL[];
 
-  protected buildPermissionsClause(): SurrealQL | null {
-    const perms = this.permissions;
-    if (!perms) {
-      return null;
-    }
+//   protected buildDefineClause(): SurrealQL {
+//     return surql`DEFINE FIELD ${new Identifier(this.name)} ON TABLE ${new Identifier(this.table.tableName)}`;
+//   }
 
-    const { select, create, update } = perms;
+//   protected buildPermissionsClause(): SurrealQL | null {
+//     const perms = this.permissions;
+//     if (!perms) {
+//       return null;
+//     }
 
-    if (select === 'NONE' && create === 'NONE' && update === 'NONE') {
-      return surql.raw(' PERMISSIONS NONE');
-    }
+//     const { select, create, update } = perms;
 
-    if (select === 'FULL' && create === 'FULL' && update === 'FULL') {
-      return surql.raw(' PERMISSIONS FULL');
-    }
+//     if (select === 'NONE' && create === 'NONE' && update === 'NONE') {
+//       return surql.raw(' PERMISSIONS NONE');
+//     }
 
-    const clauses: string[] = [];
-    if (select) {
-      clauses.push(this.formatPermission('select', select));
-    }
-    if (create) {
-      clauses.push(this.formatPermission('create', create));
-    }
-    if (update) {
-      clauses.push(this.formatPermission('update', update));
-    }
+//     if (select === 'FULL' && create === 'FULL' && update === 'FULL') {
+//       return surql.raw(' PERMISSIONS FULL');
+//     }
 
-    return clauses.length > 0 ? surql.raw(` PERMISSIONS ${clauses.join(' ')}`) : null;
-  }
+//     const clauses: string[] = [];
+//     if (select) {
+//       clauses.push(this.formatPermission('select', select));
+//     }
+//     if (create) {
+//       clauses.push(this.formatPermission('create', create));
+//     }
+//     if (update) {
+//       clauses.push(this.formatPermission('update', update));
+//     }
 
-  private formatPermission(action: string, permission: FieldPermission): string {
-    return `FOR ${action} ${permission}`;
-  }
+//     return clauses.length > 0 ? surql.raw(` PERMISSIONS ${clauses.join(' ')}`) : null;
+//   }
 
-  protected buildCommentClause(): SurrealQL | null {
-    if (!this.comment) {
-      return null;
-    }
-    return surql.raw(` COMMENT "${this.comment.replace(/"/g, '\\"')}"`);
-  }
-}
+//   private formatPermission(action: string, permission: FieldPermission): string {
+//     return `FOR ${action} ${permission}`;
+//   }
 
-export class RegularField<
-  TType extends string = string,
-  TOptional extends boolean = false
-> extends Field<TType, ParseFieldType<TType>, TOptional> {
-  public static override readonly [ENTITY_KIND]: string = 'RegularField';
+//   protected buildCommentClause(): SurrealQL | null {
+//     if (!this.comment) {
+//       return null;
+//     }
+//     return surql.raw(` COMMENT "${this.comment.replace(/"/g, '\\"')}"`);
+//   }
+// }
 
-  public declare readonly _: $Field<TType, ParseFieldType<TType>, TOptional>;
+// export class RegularField<
+//   TDataType extends string = string,
+//   TValue = ParseDataType<TDataType>,
+//   TOptional extends boolean = false
+// > extends Field<TDataType, TValue, TOptional> {
+//   public static override readonly [ENTITY_KIND]: string = 'RegularField';
 
-  private readonly config: RegularFieldConfig<TType>;
+//   public declare readonly _: $Field<TDataType, TValue, TOptional>;
 
-  public constructor(table: TableRef, name: string, config: RegularFieldConfig<TType>) {
-    super(table, name);
-    this.config = config;
-  }
+//   private readonly config: RegularFieldConfig<TDataType>;
 
-  public get dbType(): TType {
-    return this.config.type;
-  }
+//   public constructor(table: TableRef, name: string, config: RegularFieldConfig<TDataType>) {
+//     super(table, name);
+//     this.config = config;
+//   }
 
-  public get isOptional(): TOptional {
-    return this.config.type.startsWith('option<') as TOptional;
-  }
+//   public get dataType(): TDataType {
+//     return this.config.dataType;
+//   }
 
-  public get permissions(): FieldPermissions | undefined {
-    return this.config.permissions;
-  }
+//   public get isOptional(): TOptional {
+//     return this.config.dataType.startsWith('option<') as TOptional;
+//   }
 
-  public get comment(): string | undefined {
-    return this.config.comment;
-  }
+//   public get permissions(): FieldPermissions | undefined {
+//     return this.config.permissions;
+//   }
 
-  public get isFlexible(): boolean {
-    return this.config.flexible ?? false;
-  }
+//   public get comment(): string | undefined {
+//     return this.config.comment;
+//   }
 
-  public get isReadonly(): boolean {
-    return this.config.readonly ?? false;
-  }
+//   public get isFlexible(): boolean {
+//     return this.config.flexible ?? false;
+//   }
 
-  public get defaultValue(): string | undefined {
-    return this.config.default;
-  }
+//   public get isReadonly(): boolean {
+//     return this.config.readonly ?? false;
+//   }
 
-  public get valueExpression(): string | undefined {
-    return this.config.value;
-  }
+//   public get defaultValue(): string | undefined {
+//     return this.config.default;
+//   }
 
-  public get assertExpression(): string | undefined {
-    return this.config.assert;
-  }
+//   public get valueExpression(): string | undefined {
+//     return this.config.value;
+//   }
 
-  public get referenceOnDelete(): OnDeleteBehavior | undefined {
-    return this.config.reference;
-  }
+//   public get assertExpression(): string | undefined {
+//     return this.config.assert;
+//   }
 
-  protected buildSpecificClauses(): SurrealQL[] {
-    const clauses: SurrealQL[] = [];
+//   public get referenceOnDelete(): OnDeleteBehavior | undefined {
+//     return this.config.reference;
+//   }
 
-    clauses.push(
-      surql.raw(` ${this.config.flexible ? 'FLEXIBLE TYPE' : 'TYPE'} ${this.config.type}`)
-    );
+//   protected buildSpecificClauses(): SurrealQL[] {
+//     const clauses: SurrealQL[] = [];
 
-    if (this.config.reference) {
-      clauses.push(surql.raw(` REFERENCE ON DELETE ${this.config.reference}`));
-    }
+//     clauses.push(
+//       surql.raw(` ${this.config.flexible ? 'FLEXIBLE TYPE' : 'TYPE'} ${this.config.dataType}`)
+//     );
 
-    if (this.config.default !== undefined) {
-      clauses.push(
-        surql.raw(
-          ` ${this.config.defaultAlways ? 'DEFAULT ALWAYS' : 'DEFAULT'} ${this.config.default}`
-        )
-      );
-    }
+//     if (this.config.reference) {
+//       clauses.push(surql.raw(` REFERENCE ON DELETE ${this.config.reference}`));
+//     }
 
-    if (this.config.readonly) {
-      clauses.push(surql.raw(' READONLY'));
-    }
+//     if (this.config.default !== undefined) {
+//       clauses.push(
+//         surql.raw(
+//           ` ${this.config.defaultAlways ? 'DEFAULT ALWAYS' : 'DEFAULT'} ${this.config.default}`
+//         )
+//       );
+//     }
 
-    if (this.config.value) {
-      clauses.push(surql.raw(` VALUE ${this.config.value}`));
-    }
+//     if (this.config.readonly) {
+//       clauses.push(surql.raw(' READONLY'));
+//     }
 
-    if (this.config.assert) {
-      clauses.push(surql.raw(` ASSERT ${this.config.assert}`));
-    }
+//     if (this.config.value) {
+//       clauses.push(surql.raw(` VALUE ${this.config.value}`));
+//     }
 
-    return clauses;
-  }
-}
+//     if (this.config.assert) {
+//       clauses.push(surql.raw(` ASSERT ${this.config.assert}`));
+//     }
 
-export class ComputedField<
-  TType extends string = 'any',
-  TValue = ParseFieldType<TType>
-> extends Field<TType, TValue, false> {
-  public static override readonly [ENTITY_KIND]: string = 'ComputedField';
+//     return clauses;
+//   }
+// }
 
-  public declare readonly _: $Field<TType, TValue, false>;
+// export class ComputedField<
+//   TDataType extends string = string,
+//   TValue = ParseDataType<TDataType>
+// > extends Field<TDataType, TValue, false> {
+//   public static override readonly [ENTITY_KIND]: string = 'ComputedField';
 
-  private readonly config: ComputedFieldConfig<TType>;
+//   public declare readonly _: $Field<TDataType, TValue, false>;
 
-  public constructor(table: TableRef, name: string, config: ComputedFieldConfig<TType>) {
-    super(table, name);
-    this.config = config;
-  }
+//   private readonly config: ComputedFieldConfig<TDataType>;
 
-  public get dbType(): TType {
-    return (this.config.type ?? 'any') as TType;
-  }
+//   public constructor(table: TableRef, name: string, config: ComputedFieldConfig<TDataType>) {
+//     super(table, name);
+//     this.config = config;
+//   }
 
-  public get isOptional(): false {
-    return false;
-  }
+//   public get dataType(): TDataType {
+//     return (this.config.dataType ?? 'any') as TDataType;
+//   }
 
-  public get permissions(): FieldPermissions | undefined {
-    return this.config.permissions;
-  }
+//   public get isOptional(): false {
+//     return false;
+//   }
 
-  public get comment(): string | undefined {
-    return this.config.comment;
-  }
+//   public get permissions(): FieldPermissions | undefined {
+//     return this.config.permissions;
+//   }
 
-  public get expression(): string {
-    return this.config.expression;
-  }
+//   public get comment(): string | undefined {
+//     return this.config.comment;
+//   }
 
-  public get hasExplicitType(): boolean {
-    return this.config.type !== undefined;
-  }
+//   public get expression(): string {
+//     return this.config.expression;
+//   }
 
-  protected buildSpecificClauses(): SurrealQL[] {
-    const clauses: SurrealQL[] = [surql.raw(` VALUE ${this.config.expression}`)];
+//   public get hasExplicitType(): boolean {
+//     return this.config.dataType !== undefined;
+//   }
 
-    if (this.config.type) {
-      clauses.push(surql.raw(` TYPE ${this.config.type}`));
-    }
+//   protected buildSpecificClauses(): SurrealQL[] {
+//     const clauses: SurrealQL[] = [surql.raw(` VALUE ${this.config.expression}`)];
 
-    return clauses;
-  }
-}
+//     if (this.config.dataType) {
+//       clauses.push(surql.raw(` TYPE ${this.config.dataType}`));
+//     }
+
+//     return clauses;
+//   }
+// }

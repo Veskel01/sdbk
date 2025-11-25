@@ -1,5 +1,5 @@
 import { describe, expectTypeOf, it } from 'bun:test';
-import type { ParseSchema, ParseStatement, ParseType, SplitStatements } from '../../src';
+import type { ParseDataType, ParseSchema, ParseStatement, SplitStatements } from '../../src';
 
 describe('Edge Cases', () => {
   describe('Comments in strings', () => {
@@ -103,17 +103,17 @@ describe('Edge Cases', () => {
 
   describe('Complex nested types', () => {
     it('handles deeply nested array types', () => {
-      expectTypeOf<ParseType<'array<array<array<string>>>'>>().toEqualTypeOf<string[][][]>();
+      expectTypeOf<ParseDataType<'array<array<array<string>>>'>>().toEqualTypeOf<string[][][]>();
     });
 
     it('handles nested option and array', () => {
-      expectTypeOf<ParseType<'array<option<record<user>>>'>>().toEqualTypeOf<
+      expectTypeOf<ParseDataType<'array<option<record<user>>>'>>().toEqualTypeOf<
         ({ readonly __table: 'user'; readonly __id: string } | null)[]
       >();
     });
 
     it('handles option of array of option', () => {
-      expectTypeOf<ParseType<'option<array<option<string>>>'>>().toEqualTypeOf<
+      expectTypeOf<ParseDataType<'option<array<option<string>>>'>>().toEqualTypeOf<
         (string | null)[] | null
       >();
     });
@@ -121,7 +121,7 @@ describe('Edge Cases', () => {
 
   describe('Record union types', () => {
     it('handles record with two tables', () => {
-      type Result = ParseType<'record<user|post>'>;
+      type Result = ParseDataType<'record<user|post>'>;
       expectTypeOf<Result>().toExtend<
         | { readonly __table: 'user'; readonly __id: string }
         | { readonly __table: 'post'; readonly __id: string }
@@ -129,7 +129,7 @@ describe('Edge Cases', () => {
     });
 
     it('handles record with three tables', () => {
-      type Result = ParseType<'record<user|post|comment>'>;
+      type Result = ParseDataType<'record<user|post|comment>'>;
       expectTypeOf<Result>().toExtend<
         | { readonly __table: 'user'; readonly __id: string }
         | { readonly __table: 'post'; readonly __id: string }
@@ -138,7 +138,7 @@ describe('Edge Cases', () => {
     });
 
     it('handles record union in option', () => {
-      type Result = ParseType<'option<record<user|post>>'>;
+      type Result = ParseDataType<'option<record<user|post>>'>;
       expectTypeOf<Result>().toExtend<
         | (
             | { readonly __table: 'user'; readonly __id: string }
@@ -151,16 +151,18 @@ describe('Edge Cases', () => {
 
   describe('Array and Set with parameters', () => {
     it('ignores max length parameter in array', () => {
-      expectTypeOf<ParseType<'array<string, 100>'>>().toEqualTypeOf<string[]>();
-      expectTypeOf<ParseType<'array<int, 50>'>>().toEqualTypeOf<number[]>();
+      expectTypeOf<ParseDataType<'array<string, 100>'>>().toEqualTypeOf<string[]>();
+      expectTypeOf<ParseDataType<'array<int, 50>'>>().toEqualTypeOf<number[]>();
     });
 
     it('ignores max size parameter in set', () => {
-      expectTypeOf<ParseType<'set<string, 100>'>>().toEqualTypeOf<Set<string>>();
+      expectTypeOf<ParseDataType<'set<string, 100>'>>().toEqualTypeOf<Set<string>>();
     });
 
     it('handles nested types with parameters', () => {
-      expectTypeOf<ParseType<'array<option<string>, 100>'>>().toEqualTypeOf<(string | null)[]>();
+      expectTypeOf<ParseDataType<'array<option<string>, 100>'>>().toEqualTypeOf<
+        (string | null)[]
+      >();
     });
   });
 

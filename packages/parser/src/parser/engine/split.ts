@@ -23,6 +23,7 @@ type ExtractBalancedBraces<
 /**
  * Extract a statement with brace body.
  * Pattern: PREFIX { BODY }; REST or PREFIX { BODY } SUFFIX; REST
+ * Note: Always adds space before `{` to preserve separation after Trim removes trailing whitespace.
  */
 type ExtractBraceStatement<S extends string> = S extends `${infer Before}{${infer AfterOpen}`
   ? ExtractBalancedBraces<AfterOpen> extends [
@@ -30,10 +31,10 @@ type ExtractBraceStatement<S extends string> = S extends `${infer Before}{${infe
       infer AfterClose extends string
     ]
     ? AfterClose extends `;${infer Rest}`
-      ? { stmt: `${Trim<Before>}{${Body}}`; rest: Rest }
+      ? { stmt: `${Trim<Before>} {${Body}}`; rest: Rest }
       : AfterClose extends `${infer Suffix};${infer Rest}`
-        ? { stmt: `${Trim<Before>}{${Body}}${Suffix}`; rest: Rest }
-        : { stmt: `${Trim<Before>}{${Body}}${AfterClose}`; rest: '' }
+        ? { stmt: `${Trim<Before>} {${Body}}${Suffix}`; rest: Rest }
+        : { stmt: `${Trim<Before>} {${Body}}${AfterClose}`; rest: '' }
     : null
   : null;
 

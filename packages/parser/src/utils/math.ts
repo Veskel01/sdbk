@@ -186,28 +186,6 @@ export type Sub<A extends number, B extends number> = [
 ][A][B];
 
 /**
- * Combined add and subtract: (D + Add) - Sub.
- * Useful for depth tracking with parentheses.
- *
- * @example
- * ```typescript
- * type Result = AddSub<5, 3, 2>; // 6 (5 + 3 - 2)
- * ```
- */
-export type AddSub<D extends number, A extends number, S extends number> = Sub<Add<D, A>, S>;
-
-/**
- * Checks if a number is zero.
- *
- * @example
- * ```typescript
- * type Result = IsZero<0>; // true
- * type Result2 = IsZero<5>; // false
- * ```
- */
-export type IsZero<N extends number> = N extends 0 ? true : false;
-
-/**
  * Parses a string as a number literal type.
  *
  * @example
@@ -217,13 +195,3 @@ export type IsZero<N extends number> = N extends 0 ? true : false;
  * ```
  */
 export type ParseNumber<S extends string> = S extends `${infer N extends number}` ? N : undefined;
-
-/**
- * @deprecated Use Inc<N> instead - faster lookup table implementation.
- */
-export type Add1<N extends number> = Inc<N>;
-
-/**
- * @deprecated Use Dec<N> instead - faster lookup table implementation.
- */
-export type Sub1<N extends number> = Dec<N>;

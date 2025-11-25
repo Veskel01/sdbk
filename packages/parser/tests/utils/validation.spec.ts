@@ -39,6 +39,19 @@ describe('IsValidFieldName', () => {
     expectTypeOf<IsValidFieldName<'createdAt'>>().toEqualTypeOf<true>();
   });
 
+  it('accepts nested field names with dots', () => {
+    expectTypeOf<IsValidFieldName<'emails.address'>>().toEqualTypeOf<true>();
+    expectTypeOf<IsValidFieldName<'address.city'>>().toEqualTypeOf<true>();
+    expectTypeOf<IsValidFieldName<'time.created_at'>>().toEqualTypeOf<true>();
+  });
+
+  it('accepts wildcard field names for array elements', () => {
+    expectTypeOf<IsValidFieldName<'addresses.*'>>().toEqualTypeOf<true>();
+    expectTypeOf<IsValidFieldName<'addresses.*.city'>>().toEqualTypeOf<true>();
+    expectTypeOf<IsValidFieldName<'addresses.*.coordinates'>>().toEqualTypeOf<true>();
+    expectTypeOf<IsValidFieldName<'items.*.name'>>().toEqualTypeOf<true>();
+  });
+
   it('rejects invalid field names', () => {
     expectTypeOf<IsValidFieldName<''>>().toEqualTypeOf<false>();
     expectTypeOf<IsValidFieldName<'123field'>>().toEqualTypeOf<false>();

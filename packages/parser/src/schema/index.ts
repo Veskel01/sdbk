@@ -6,6 +6,7 @@ export type * from './analyzer';
 export type * from './bucket';
 export type * from './builder';
 export type * from './config';
+export type * from './data-type';
 export type * from './event';
 export type * from './function';
 export type * from './index-schema';

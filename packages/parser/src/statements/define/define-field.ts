@@ -1,5 +1,4 @@
-import type { ParseErrors } from '../../parser/errors';
-import type { ParseType } from '../../parser/mapper';
+import type { ParseDataType, ParseErrors } from '../../parser';
 import type { HasFlexible, HasReadonly } from '../../parser/modifiers';
 import type {
   AfterFirstWord,
@@ -332,25 +331,63 @@ type _ExtractPermExpr<S extends string> = S extends `${infer Expr} FOR ${string}
             ? Trim<Expr>
             : Trim<S>;
 
-type _ExtractType<S extends string> = Upper<S> extends `TYPE ${string}`
-  ? ParseType<_TypeVal<S>>
-  : Upper<S> extends `${string} TYPE ${string}`
-    ? ParseType<_TypeVal<S>>
-    : unknown;
+type _ExtractType<S extends string> = _HasTypeKeyword<S> extends true
+  ? ParseDataType<_TypeVal<S>>
+  : unknown;
 
-type _ExtractDataType<S extends string> = Upper<S> extends `TYPE ${string}`
-  ? _TypeVal<S>
-  : Upper<S> extends `${string} TYPE ${string}`
-    ? _TypeVal<S>
-    : undefined;
+/** Check if string contains TYPE keyword (handles space, newline, tab after TYPE) */
+type _HasTypeKeyword<S extends string> = _NormalizeWS<Upper<S>> extends `TYPE ${string}`
+  ? true
+  : _NormalizeWS<Upper<S>> extends `${string} TYPE ${string}`
+    ? true
+    : false;
 
-type _TypeVal<S extends string> = S extends `${string}TYPE ${infer R}`
+/** Normalize first whitespace char after TYPE to space for matching */
+type _NormalizeWS<S extends string> = S extends `${infer Before}TYPE\r\n${infer After}`
+  ? `${Before}TYPE ${After}`
+  : S extends `${infer Before}TYPE\n${infer After}`
+    ? `${Before}TYPE ${After}`
+    : S extends `${infer Before}TYPE\t${infer After}`
+      ? `${Before}TYPE ${After}`
+      : S;
+
+type _ExtractDataType<S extends string> = _HasTypeKeyword<S> extends true ? _TypeVal<S> : undefined;
+
+type _TypeVal<S extends string> = _ExtractAfterType<S> extends infer R extends string
   ? _CleanType<Trim<R>>
+  : never;
+
+/** Extract content after TYPE keyword, handling space/newline/tab separators */
+type _ExtractAfterType<S extends string> = _ExtractAfterTypeNorm<_NormalizeTypeWS<S>>;
+
+type _ExtractAfterTypeNorm<S extends string> = S extends `${string}TYPE ${infer R}`
+  ? R
   : S extends `${string}type ${infer R}`
-    ? _CleanType<Trim<R>>
+    ? R
     : S extends `${string}Type ${infer R}`
-      ? _CleanType<Trim<R>>
+      ? R
       : never;
+
+/** Normalize whitespace after TYPE keyword to space */
+type _NormalizeTypeWS<S extends string> = S extends `${infer Before}TYPE\r\n${infer After}`
+  ? `${Before}TYPE ${After}`
+  : S extends `${infer Before}TYPE\n${infer After}`
+    ? `${Before}TYPE ${After}`
+    : S extends `${infer Before}TYPE\t${infer After}`
+      ? `${Before}TYPE ${After}`
+      : S extends `${infer Before}type\r\n${infer After}`
+        ? `${Before}type ${After}`
+        : S extends `${infer Before}type\n${infer After}`
+          ? `${Before}type ${After}`
+          : S extends `${infer Before}type\t${infer After}`
+            ? `${Before}type ${After}`
+            : S extends `${infer Before}Type\r\n${infer After}`
+              ? `${Before}Type ${After}`
+              : S extends `${infer Before}Type\n${infer After}`
+                ? `${Before}Type ${After}`
+                : S extends `${infer Before}Type\t${infer After}`
+                  ? `${Before}Type ${After}`
+                  : S;
 
 type _CleanType<S extends string> = Upper<S> extends `${string} READONLY${string}`
   ? _TrimUpper<S, 'READONLY'>
