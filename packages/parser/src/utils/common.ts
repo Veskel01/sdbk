@@ -1,4 +1,4 @@
-import type { Trim } from './string';
+import type { FirstWord, Trim } from './string';
 
 // =============================================================================
 // MODIFIER EXTRACTION
@@ -116,9 +116,7 @@ export type ParseQuotedString<S extends string> = S extends `"${infer Content}"$
           ? Content
           : S extends `f'${infer Content}'`
             ? Content
-            : _FirstWordFallback<S>;
-
-type _FirstWordFallback<S extends string> = S extends `${infer W} ${string}` ? W : S;
+            : FirstWord<S>;
 
 // =============================================================================
 // DURATION EXTRACTION
@@ -235,3 +233,19 @@ type _ScanValueUntilKeyword<
     ? Trim<Acc>
     : _ScanValueUntilKeyword<Rest, Acc extends '' ? Word : `${Acc} ${Word}`, Keywords>
   : Trim<Acc extends '' ? S : `${Acc} ${S}`>;
+
+/**
+ * Check if string has unclosed parenthesis.
+ * Used for parsing comma-separated lists where items may contain parentheses.
+ *
+ * @example
+ * ```typescript
+ * type Result = HasUnclosedParen<'foo(bar'>; // true
+ * type Result2 = HasUnclosedParen<'foo(bar)'>; // false
+ * ```
+ */
+export type HasUnclosedParen<S extends string> = S extends `${string}(${infer After}`
+  ? After extends `${string})${string}`
+    ? false
+    : true
+  : false;

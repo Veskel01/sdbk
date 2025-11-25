@@ -1,4 +1,4 @@
-import type { AfterFirstWord, FirstWord, Trim, Upper } from '../../utils';
+import type { AfterFirstWord, FirstWord, HasUnclosedParen, Trim, Upper } from '../../utils';
 
 /**
  * Tables configuration for GraphQL.
@@ -123,18 +123,12 @@ type _SplitMiddleware<
   S extends string,
   Acc extends string[] = []
 > = S extends `${infer Item},${infer Rest}`
-  ? _HasUnclosedParen<Item> extends true
+  ? HasUnclosedParen<Item> extends true
     ? _HandleMiddlewareParenItem<S, Acc>
     : _SplitMiddleware<Trim<Rest>, [...Acc, Trim<Item>]>
   : Trim<S> extends ''
     ? Acc
     : [...Acc, Trim<S>];
-
-type _HasUnclosedParen<S extends string> = S extends `${string}(${infer After}`
-  ? After extends `${string})${string}`
-    ? false
-    : true
-  : false;
 
 type _HandleMiddlewareParenItem<
   S extends string,

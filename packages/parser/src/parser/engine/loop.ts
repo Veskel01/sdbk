@@ -1,3 +1,4 @@
+import type { Dec } from '../../utils/math';
 import type { ScanNext } from './scanner';
 import type { ParserState, State } from './state';
 
@@ -15,66 +16,7 @@ type ProcessSegment<S extends ParserState, Remaining extends number> = Remaining
   ? S
   : S['input'] extends ''
     ? S
-    : ProcessSegment<ScanNext<S>, DecrementSegment<Remaining>>;
-
-/**
- * Decrement counter for segment processing.
- * Optimized lookup table for values 0-50.
- */
-type DecrementSegment<N extends number> = [
-  never,
-  0,
-  1,
-  2,
-  3,
-  4,
-  5,
-  6,
-  7,
-  8,
-  9,
-  10,
-  11,
-  12,
-  13,
-  14,
-  15,
-  16,
-  17,
-  18,
-  19,
-  20,
-  21,
-  22,
-  23,
-  24,
-  25,
-  26,
-  27,
-  28,
-  29,
-  30,
-  31,
-  32,
-  33,
-  34,
-  35,
-  36,
-  37,
-  38,
-  39,
-  40,
-  41,
-  42,
-  43,
-  44,
-  45,
-  46,
-  47,
-  48,
-  49,
-  50
-][N];
+    : ProcessSegment<ScanNext<S>, Dec<Remaining>>;
 
 /**
  * Main parsing loop using tail recursion with segment-based processing.

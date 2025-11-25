@@ -1,27 +1,4 @@
-import type { RemoveCommentsSafe, Trim } from '../../utils';
-
-/**
- * Remove line comments (-- comment).
- */
-export type RemoveLineComments<S extends string> =
-  S extends `${infer Before}--${infer _}\n${infer After}`
-    ? RemoveLineComments<`${Before}\n${After}`>
-    : S extends `${infer Before}--${infer _}`
-      ? Before
-      : S;
-
-/**
- * Remove block comments.
- */
-export type RemoveBlockComments<S extends string> =
-  S extends `${infer Before}/*${infer _}*/${infer After}`
-    ? RemoveBlockComments<`${Before}${After}`>
-    : S;
-
-/**
- * Remove all comments from input.
- */
-export type RemoveComments<S extends string> = RemoveBlockComments<RemoveLineComments<S>>;
+import type { Dec, Inc, RemoveCommentsSafe, Trim } from '../../utils';
 
 /**
  * Extract content inside balanced braces { ... }.
@@ -34,17 +11,14 @@ type ExtractBalancedBraces<
 > = Depth extends 0
   ? [Body, S]
   : S extends `{${infer Rest}`
-    ? ExtractBalancedBraces<Rest, `${Body}{`, _Inc<Depth>>
+    ? ExtractBalancedBraces<Rest, `${Body}{`, Inc<Depth>>
     : S extends `}${infer Rest}`
       ? Depth extends 1
         ? [Body, Rest]
-        : ExtractBalancedBraces<Rest, `${Body}}`, _Dec<Depth>>
+        : ExtractBalancedBraces<Rest, `${Body}}`, Dec<Depth>>
       : S extends `${infer C}${infer Rest}`
         ? ExtractBalancedBraces<Rest, `${Body}${C}`, Depth>
         : [Body, ''];
-
-type _Inc<N extends number> = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 10, 10, 10][N];
-type _Dec<N extends number> = [0, 0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 10][N];
 
 /**
  * Extract a statement with brace body.
@@ -107,8 +81,7 @@ type SplitWithDepth<S extends string, Acc extends string[] = []> = Trim<S> exten
 /**
  * Split SurrealQL input into individual statements.
  */
-export type SplitStatements<S extends string> = RemoveComments<S> extends infer Clean extends string
+export type SplitStatements<S extends string> = RemoveCommentsSafe<S> extends infer Clean extends
+  string
   ? SplitWithDepth<Clean>
-  : RemoveCommentsSafe<S> extends infer SafeClean extends string
-    ? SplitWithDepth<SafeClean>
-    : never;
+  : never;

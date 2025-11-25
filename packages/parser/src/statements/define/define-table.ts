@@ -1,6 +1,7 @@
 import type { ParseErrors } from '../../parser/errors';
 import type {
   ExtractComment,
+  FirstWord,
   IsValidTableName,
   SkipIfNotExists,
   SkipOverwrite,
@@ -267,16 +268,14 @@ type _GetRelationTable<
   S extends string,
   Keyword extends string
 > = S extends `${string}${Keyword} ${infer Table} ${string}`
-  ? _FirstWord<Table>
+  ? FirstWord<Table>
   : S extends `${string}${Lowercase<Keyword>} ${infer Table} ${string}`
-    ? _FirstWord<Table>
+    ? FirstWord<Table>
     : S extends `${string}${Keyword} ${infer Table}`
-      ? _FirstWord<Table>
+      ? FirstWord<Table>
       : S extends `${string}${Lowercase<Keyword>} ${infer Table}`
-        ? _FirstWord<Table>
+        ? FirstWord<Table>
         : undefined;
-
-type _FirstWord<S extends string> = S extends `${infer W} ${string}` ? W : S;
 
 type _HasEnforced<S extends string> = Upper<S> extends `${string}ENFORCED${string}` ? true : false;
 

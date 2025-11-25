@@ -1,4 +1,11 @@
-import type { AfterFirstWord, ExtractComment, FirstWord, Trim, Upper } from '../../utils';
+import type {
+  AfterFirstWord,
+  ExtractComment,
+  FirstWord,
+  HasUnclosedParen,
+  Trim,
+  Upper
+} from '../../utils';
 
 /**
  * Available tokenizer types in SurrealDB.
@@ -186,21 +193,12 @@ type _SplitByComma<
   S extends string,
   Acc extends string[] = []
 > = S extends `${infer Item},${infer Rest}`
-  ? _HasUnclosedParen<Item> extends true
+  ? HasUnclosedParen<Item> extends true
     ? _HandleParenItem<S, Acc>
     : _SplitByComma<Trim<Rest>, [...Acc, Trim<Item>]>
   : Trim<S> extends ''
     ? Acc
     : [...Acc, Trim<S>];
-
-/**
- * Check if string has unclosed parenthesis.
- */
-type _HasUnclosedParen<S extends string> = S extends `${string}(${infer After}`
-  ? After extends `${string})${string}`
-    ? false
-    : true
-  : false;
 
 /**
  * Handle item with unclosed parenthesis - find closing paren.
