@@ -238,61 +238,41 @@ type Statements = SplitStatements<`
 ### Table Schema
 
 ```typescript
-type TableSchema = {
-  name: string;
-  schemaMode: 'schemafull' | 'schemaless';
-  tableType: 'any' | 'normal' | 'relation' | undefined;
-  drop: boolean;
-  overwrite: boolean;
-  ifNotExists: boolean;
-  asSelect: string | undefined;         // For view tables
-  changefeed: ChangefeedConfig | undefined;
-  permissions: TablePermissions | undefined;
-  comment: string | undefined;
-  relationConfig: RelationConfig | undefined;
-  fields: { [fieldName: string]: FieldSchema };
-};
+import type { Schema } from '@sdbk/parser';
+
+type UserTable = Schema['tables']['user'];
+// TableSchema:
+UserTable['schemaMode'];      // 'schemafull' | 'schemaless' | undefined
+UserTable['tableType'];       // 'any' | 'normal' | 'relation' | undefined
+UserTable['changefeed'];      // ChangefeedConfigSchema | undefined
+UserTable['permissions'];     // TablePermissionsSchema | undefined
+UserTable['relationConfig'];  // RelationConfigSchema | undefined
+UserTable['fields'];          // Record<string, FieldSchema>
 ```
 
 ### Field Schema
 
 ```typescript
-type FieldSchema = {
-  name: string;
-  table: string;
-  type: TypeScriptType;                 // Mapped from SurrealQL type
-  dataType: string | undefined;         // Raw SurrealQL type string
-  readonly: boolean;
-  flexible: boolean;
-  computed: string | undefined;
-  default: string | undefined;
-  defaultAlways: boolean;
-  value: string | undefined;
-  assert: string | undefined;
-  reference: ReferenceConfig | undefined;
-  permissions: FieldPermissions | undefined;
-  comment: string | undefined;
-  overwrite: boolean;
-  ifNotExists: boolean;
-};
+import type { Schema } from '@sdbk/parser';
+
+type EmailField = Schema['tables']['user']['fields']['email'];
+// FieldSchema:
+EmailField['type'];         // mapped TypeScript type inferred from SurrealQL TYPE
+EmailField['dataType'];     // original SurrealQL type string, e.g. 'option<string>'
+EmailField['readonly'];     // boolean
+EmailField['reference'];    // ReferenceConfigSchema | undefined
+EmailField['permissions'];  // FieldPermissionsSchema | undefined
 ```
 
 ### Index Schema
 
 ```typescript
-type IndexSchema = {
-  name: string;
-  table: string;
-  fields: string[];
-  unique: boolean;
-  indexType: 'unique' | 'search' | 'fulltext' | 'hnsw' | 'count' | undefined;
-  analyzer: string | undefined;
-  hnswConfig: HnswConfig | undefined;
-  concurrently: boolean;
-  comment: string | undefined;
-  overwrite: boolean;
-  ifNotExists: boolean;
-};
+import type { Schema } from '@sdbk/parser';
+
+type EmailIndex = Schema['indexes']['idx_email'];
+// IndexSchema:
+EmailIndex['indexType'];   // 'unique' | 'search' | 'fulltext' | 'hnsw' | 'count' | undefined
+EmailIndex['hnswConfig'];  // HnswConfig | undefined
 ```
 
 ## Advanced Examples
