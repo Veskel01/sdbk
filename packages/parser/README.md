@@ -58,16 +58,16 @@ parsing happens at the type level.
 
 ```bash
 # npm
-npm install @sdbk/parser
+npm install --save-dev @sdbk/parser
 
 # bun
-bun add @sdbk/parser
+bun add --save-dev @sdbk/parser
 
 # pnpm
-pnpm add @sdbk/parser
+pnpm add --save-dev @sdbk/parser
 
 # yarn
-yarn add @sdbk/parser
+yarn add --save-dev @sdbk/parser
 ```
 
 ## Quick Start

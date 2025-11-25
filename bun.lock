@@ -13,7 +13,7 @@
         "@commitlint/types": "20.0.0",
         "@types/bun": "1.3.3",
         "husky": "9.1.7",
-        "lint-staged": "16.2.7",
+        "lint-staged": "^16.2.7",
         "markdownlint-cli": "0.46.0",
         "rimraf": "6.1.2",
         "turbo": "2.6.1",
@@ -23,13 +23,6 @@
     },
     "packages/core": {
       "name": "@sdbk/core",
-      "version": "0.0.1",
-      "peerDependencies": {
-        "typescript": ">=5.0.0",
-      },
-    },
-    "packages/core-leg": {
-      "name": "@sdbk/core-leg",
       "version": "0.0.1",
       "peerDependencies": {
         "typescript": ">=5.0.0",
@@ -119,8 +112,6 @@
     "@isaacs/cliui": ["@isaacs/cliui@8.0.2", "", { "dependencies": { "string-width": "^5.1.2", "string-width-cjs": "npm:string-width@^4.2.0", "strip-ansi": "^7.0.1", "strip-ansi-cjs": "npm:strip-ansi@^6.0.1", "wrap-ansi": "^8.1.0", "wrap-ansi-cjs": "npm:wrap-ansi@^7.0.0" } }, "sha512-O8jcjabXaleOG9DQ0+ARXWZBTfnP4WNAqzuiJK7ll44AmxGKv/J2M4TPjxjY3znBCfvBXFzucm1twdyFybFqEA=="],
 
     "@sdbk/core": ["@sdbk/core@workspace:packages/core"],
-
-    "@sdbk/core-leg": ["@sdbk/core-leg@workspace:packages/core-leg"],
 
     "@sdbk/parser": ["@sdbk/parser@workspace:packages/parser"],
 

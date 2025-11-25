@@ -59,28 +59,6 @@ The following packages are planned and will build on top of `@sdbk/core`:
 *All packages depend on `@sdbk/core` for shared type definitions and
 utilities.*
 
-## Installation
-
-Install the packages you need. Most packages will automatically include
-`@sdbk/core` as a dependency:
-
-```bash
-# Install parser for schema type generation
-npm install @sdbk/parser
-
-# Or install core directly for building on top of it
-npm install @sdbk/core
-
-# Using bun
-bun add @sdbk/parser
-
-# Using pnpm
-pnpm add @sdbk/parser
-```
-
-> **Note:** `@sdbk/core` will be automatically installed as a peer dependency
-> for packages that require it.
-
 ## Usage
 
 Check out the individual package documentation for usage examples:
