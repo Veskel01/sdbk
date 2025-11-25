@@ -44,7 +44,7 @@ types, building blocks, and shared abstractions used across rest of the packages
 A compile-time SurrealQL parser that transforms database schema definitions into
 fully typed TypeScript types. Useful for type generation and schema validation.
 
-**Status:** ✅ Available
+**Status:** 🚧 In Development
 
 [📖 Read the documentation](./packages/parser/README.md)
 
