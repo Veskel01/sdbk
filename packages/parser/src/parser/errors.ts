@@ -1,14 +1,4 @@
 /**
- * Parser error types providing detailed, branded error information.
- *
- * @remarks
- * These types are used when the parser encounters invalid input or
- * unsupported syntax. They provide meaningful error messages at compile time.
- *
- * @packageDocumentation
- */
-
-/**
  * Branded error type for parse errors.
  *
  * @remarks
