@@ -1,4 +1,12 @@
-import type { GeometrySubtype } from '../schema';
+import type {
+  CollectionTypeMap,
+  Duration,
+  Geometry,
+  GeometryTypeMap,
+  Range,
+  RecordId,
+  TypeMap
+} from '../schema/type-map';
 import type { Dec, FirstWord, Inc, Trim, Upper } from '../utils';
 import type { ParseErrors } from './errors';
 import type {
@@ -6,19 +14,6 @@ import type {
   FieldTypeTokenizer,
   TokenizerParse
 } from './tokenizer';
-import type {
-  Duration,
-  GeoJSON,
-  GeometryCollectionGeometry,
-  LineStringGeometry,
-  MultiLineStringGeometry,
-  MultiPointGeometry,
-  MultiPolygonGeometry,
-  PointGeometry,
-  PolygonGeometry,
-  RecordId,
-  TypeMap
-} from './types';
 
 /** Validate input using tokenizer */
 type _Validate<S extends string> = TokenizerParse<FieldTypeTokenizer, Trim<S>>;
@@ -48,10 +43,6 @@ export type ParseDataType<S extends string> = _Validate<S> extends infer V
       ? _ParseUnion<V, 0>
       : never
   : never;
-
-// ============================================================================
-// Generic String Splitter with Nesting Awareness
-// ============================================================================
 
 /**
  * Parser state for tracking nesting depth and string context.
@@ -202,10 +193,6 @@ type _SplitAll<Input extends string, Delim extends string, Acc extends string[] 
     : _SplitAll<Rest, Delim, [...Acc, First]>
   : Acc;
 
-// ============================================================================
-// Union/Literal Type Parsing
-// ============================================================================
-
 /**
  * Entry point for parsing types that may contain unions (`|`).
  * Splits at top-level `|` and creates a TypeScript union type.
@@ -247,10 +234,6 @@ type _ParseSingleType<S extends string, Depth extends number> = Trim<S> extends 
               _MapType<T, Depth>
   : unknown;
 
-// ============================================================================
-// Tuple Parsing
-// ============================================================================
-
 /**
  * Parse tuple body: `T, U, V` → [T, U, V]
  */
@@ -272,10 +255,6 @@ type _ParseTupleItems<Items extends string[], Depth extends number> = Items exte
       : [T, ..._ParseTupleItems<Rest, Depth>]
     : never
   : [];
-
-// ============================================================================
-// Object Literal Parsing
-// ============================================================================
 
 /**
  * Parse object literal body: `key: type, key2: type2`
@@ -317,10 +296,6 @@ type _SplitObjectField<S extends string> = S extends `${infer Key}:${infer After
  */
 type _ExtractFieldType<S extends string> = _SplitAt<S, ',', _InitState, 'tuple'>;
 
-// ============================================================================
-// Type Mapping
-// ============================================================================
-
 /**
  * Internal type mapper with depth tracking for recursion prevention.
  * Optimized with early returns for common types.
@@ -342,49 +317,58 @@ type _FastMap<S extends string> = S extends keyof TypeMap ? TypeMap[S] : never;
 
 /**
  * Complex type mapping for generic/parameterized types.
+ * Uses CollectionTypeMap for array, set, option mappings.
  */
-type _MapComplex<S extends string, Depth extends number> = Upper<S> extends `ARRAY<${string}>`
-  ? _MapType<_Inner<S>, Inc<Depth>>[]
+type _MapComplex<S extends string, Depth extends number> = Upper<S> extends `ARRAY<${
+  string // Array types: array<T> or array<T, N>
+}>`
+  ? _MapCollection<'array', _MapType<_Inner<S>, Inc<Depth>>>
   : Upper<S> extends `ARRAY<${string}>${string}`
-    ? _MapType<_Inner<S>, Inc<Depth>>[]
-    : // Set types: set<T> or set<T, N>
+    ? _MapCollection<'array', _MapType<_Inner<S>, Inc<Depth>>>
+    : // Set types: set<T> or set<T, N> - maps to array (SurrealDB returns sets as arrays)
       Upper<S> extends `SET<${string}>`
-      ? Set<_MapType<_Inner<S>, Inc<Depth>>>
+      ? _MapCollection<'set', _MapType<_Inner<S>, Inc<Depth>>>
       : Upper<S> extends `SET<${string}>${string}`
-        ? Set<_MapType<_Inner<S>, Inc<Depth>>>
+        ? _MapCollection<'set', _MapType<_Inner<S>, Inc<Depth>>>
         : // Option types: option<T> (nullable)
           Upper<S> extends `OPTION<${string}>`
-          ? _MapType<_Inner<S>, Inc<Depth>> | null
+          ? _MapCollection<'option', _MapType<_Inner<S>, Inc<Depth>>>
           : Upper<S> extends `OPTION<${string}>${string}`
-            ? _MapType<_Inner<S>, Inc<Depth>> | null
+            ? _MapCollection<'option', _MapType<_Inner<S>, Inc<Depth>>>
             : // Record types: record<table> or record<table|table2>
               Upper<S> extends `RECORD<${infer Table}>`
               ? _ExtractTableName<Table>
               : Upper<S> extends `RECORD<${infer Table}>${string}`
                 ? _ExtractTableName<Table>
                 : // Range types: range<T>
-                  Upper<S> extends `RANGE<${string}>`
-                  ? [number, number]
-                  : Upper<S> extends `RANGE<${string}>${string}`
-                    ? [number, number]
-                    : // Duration types: duration<subtype>
-                      Upper<S> extends `DURATION<${infer Subtype}>`
-                      ? Duration<Lowercase<Trim<Subtype>>>
-                      : Upper<S> extends `DURATION<${string}>${string}`
-                        ? Duration<string>
-                        : // Geometry types: geometry<subtype>
-                          Upper<S> extends `GEOMETRY<${infer Subtype}>`
-                          ? _MapGeometrySubtype<Lowercase<Trim<Subtype>>>
-                          : Upper<S> extends `GEOMETRY<${string}>${string}`
-                            ? GeoJSON
-                            : // Literal types: literal<value>
-                              Upper<S> extends `LITERAL<${string}>`
-                              ? _ParseLiteral<_Inner<S>>
-                              : // Plain 'record' without parameter
-                                Upper<S> extends 'RECORD'
-                                ? RecordId
-                                : // Fallback to basic type lookup
-                                  _Map<Lowercase<FirstWord<S>>>;
+                  Upper<S> extends `RANGE<${infer Inner}>`
+                  ? Range<_MapType<Trim<Inner>, Inc<Depth>>>
+                  : Upper<S> extends `RANGE<${infer Inner}>${string}`
+                    ? Range<_MapType<Trim<Inner>, Inc<Depth>>>
+                    : // Plain range without parameter
+                      Upper<S> extends 'RANGE'
+                      ? Range
+                      : // Duration types: duration<subtype>
+                        Upper<S> extends `DURATION<${infer Subtype}>`
+                        ? Duration<Lowercase<Trim<Subtype>>>
+                        : Upper<S> extends `DURATION<${string}>${string}`
+                          ? Duration<string>
+                          : // Geometry types: geometry<subtype>
+                            Upper<S> extends `GEOMETRY<${infer Subtype}>`
+                            ? _MapGeometrySubtype<Lowercase<Trim<Subtype>>>
+                            : Upper<S> extends `GEOMETRY<${string}>${string}`
+                              ? Geometry
+                              : // Plain geometry without parameter
+                                Upper<S> extends 'GEOMETRY'
+                                ? TypeMap['geometry']
+                                : // Literal types: literal<value>
+                                  Upper<S> extends `LITERAL<${string}>`
+                                  ? _ParseLiteral<_Inner<S>>
+                                  : // Plain 'record' without parameter
+                                    Upper<S> extends 'RECORD'
+                                    ? RecordId
+                                    : // Fallback to basic type lookup
+                                      _Map<Lowercase<FirstWord<S>>>;
 
 /**
  * Parse literal content: handles strings, numbers, and identifiers.
@@ -464,22 +448,22 @@ type _StripAtLevel<
 type _Map<T extends string> = T extends keyof TypeMap ? TypeMap[T] : unknown;
 
 /**
- * Maps geometry subtype string to specific GeoJSON interface.
- * @see {@link GeometrySubtype}
+ * Maps geometry subtype string to specific Geometry interface.
+ * Uses GeometryTypeMap as single source of truth.
  * @see https://surrealdb.com/docs/surrealql/datamodel/geometries
  */
-type _MapGeometrySubtype<S extends string> = S extends 'point'
-  ? PointGeometry
-  : S extends 'linestring'
-    ? LineStringGeometry
-    : S extends 'polygon'
-      ? PolygonGeometry
-      : S extends 'multipoint'
-        ? MultiPointGeometry
-        : S extends 'multilinestring'
-          ? MultiLineStringGeometry
-          : S extends 'multipolygon'
-            ? MultiPolygonGeometry
-            : S extends 'collection'
-              ? GeometryCollectionGeometry
-              : GeoJSON;
+type _MapGeometrySubtype<S extends string> = S extends keyof GeometryTypeMap
+  ? GeometryTypeMap[S]
+  : Geometry;
+
+/**
+ * Maps collection type to its TypeScript representation with inner type.
+ * Uses CollectionTypeMap as single source of truth.
+ */
+type _MapCollection<Kind extends keyof CollectionTypeMap, Inner> = Kind extends 'array'
+  ? Inner[]
+  : Kind extends 'set'
+    ? Inner[]
+    : Kind extends 'option'
+      ? Inner | null
+      : never;

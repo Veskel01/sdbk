@@ -1,8 +1,10 @@
+import { SYMBOL } from '../../constants';
+
 /**
  * Symbol for storing the generator instance.
  * @internal
  */
-const GENERATOR_SYMBOL = Symbol.for('sdbk:id-generator');
+const GENERATOR_SYMBOL = Symbol.for(SYMBOL.ID_GENERATOR);
 
 /**
  * Interface for the ID generator instance.

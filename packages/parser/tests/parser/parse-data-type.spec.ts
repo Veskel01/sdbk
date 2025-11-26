@@ -1,5 +1,22 @@
 import { describe, expectTypeOf, it } from 'bun:test';
-import type { GeoJSON, ParseDataType } from '../../src';
+import type {
+  Bytes,
+  Datetime,
+  Duration,
+  Geometry,
+  GeometryCollection,
+  LineStringGeometry,
+  MultiLineStringGeometry,
+  MultiPointGeometry,
+  MultiPolygonGeometry,
+  ParseDataType,
+  PointGeometry,
+  PolygonGeometry,
+  Range,
+  RecordId,
+  ULID,
+  UUID
+} from '../../src';
 
 describe('ParseDataType', () => {
   describe('Basic types', () => {
@@ -38,48 +55,36 @@ describe('ParseDataType', () => {
 
   describe('Date/Time types', () => {
     it('parses datetime type', () => {
-      expectTypeOf<ParseDataType<'datetime'>>().toEqualTypeOf<Date>();
+      expectTypeOf<ParseDataType<'datetime'>>().toEqualTypeOf<Datetime>();
     });
 
     it('parses duration type', () => {
-      expectTypeOf<ParseDataType<'duration'>>().toExtend<string & { readonly __duration: true }>();
+      expectTypeOf<ParseDataType<'duration'>>().toEqualTypeOf<Duration>();
     });
 
     it('parses duration subtypes', () => {
-      expectTypeOf<ParseDataType<'duration<year>'>>().toExtend<
-        string & { readonly __duration: true; readonly __subtype: 'year' }
-      >();
-      expectTypeOf<ParseDataType<'duration<month>'>>().toExtend<
-        string & { readonly __duration: true; readonly __subtype: 'month' }
-      >();
-      expectTypeOf<ParseDataType<'duration<day>'>>().toExtend<
-        string & { readonly __duration: true; readonly __subtype: 'day' }
-      >();
-      expectTypeOf<ParseDataType<'duration<hour>'>>().toExtend<
-        string & { readonly __duration: true; readonly __subtype: 'hour' }
-      >();
-      expectTypeOf<ParseDataType<'duration<minute>'>>().toExtend<
-        string & { readonly __duration: true; readonly __subtype: 'minute' }
-      >();
-      expectTypeOf<ParseDataType<'duration<second>'>>().toExtend<
-        string & { readonly __duration: true; readonly __subtype: 'second' }
-      >();
+      expectTypeOf<ParseDataType<'duration<year>'>>().toEqualTypeOf<Duration<'year'>>();
+      expectTypeOf<ParseDataType<'duration<month>'>>().toEqualTypeOf<Duration<'month'>>();
+      expectTypeOf<ParseDataType<'duration<day>'>>().toEqualTypeOf<Duration<'day'>>();
+      expectTypeOf<ParseDataType<'duration<hour>'>>().toEqualTypeOf<Duration<'hour'>>();
+      expectTypeOf<ParseDataType<'duration<minute>'>>().toEqualTypeOf<Duration<'minute'>>();
+      expectTypeOf<ParseDataType<'duration<second>'>>().toEqualTypeOf<Duration<'second'>>();
     });
   });
 
   describe('Identifier types', () => {
     it('parses uuid type', () => {
-      expectTypeOf<ParseDataType<'uuid'>>().toEqualTypeOf<string>();
+      expectTypeOf<ParseDataType<'uuid'>>().toEqualTypeOf<UUID>();
     });
 
     it('parses ulid type', () => {
-      expectTypeOf<ParseDataType<'ulid'>>().toEqualTypeOf<string>();
+      expectTypeOf<ParseDataType<'ulid'>>().toEqualTypeOf<ULID>();
     });
   });
 
   describe('Binary types', () => {
     it('parses bytes type', () => {
-      expectTypeOf<ParseDataType<'bytes'>>().toEqualTypeOf<Uint8Array>();
+      expectTypeOf<ParseDataType<'bytes'>>().toEqualTypeOf<Bytes>();
     });
   });
 
@@ -101,68 +106,44 @@ describe('ParseDataType', () => {
     });
 
     it('parses set types', () => {
-      expectTypeOf<ParseDataType<'set<string>'>>().toEqualTypeOf<Set<string>>();
-      expectTypeOf<ParseDataType<'set<int>'>>().toEqualTypeOf<Set<number>>();
+      expectTypeOf<ParseDataType<'set<string>'>>().toEqualTypeOf<string[]>();
+      expectTypeOf<ParseDataType<'set<int>'>>().toEqualTypeOf<number[]>();
     });
 
     it('parses record types', () => {
-      expectTypeOf<ParseDataType<'record<user>'>>().toEqualTypeOf<{
-        readonly __table: 'user';
-        readonly __id: string;
-      }>();
+      expectTypeOf<ParseDataType<'record<user>'>>().toEqualTypeOf<RecordId<'user'>>();
     });
 
     it('parses record type without parameter', () => {
-      expectTypeOf<ParseDataType<'record'>>().toEqualTypeOf<{
-        readonly __table: string;
-        readonly __id: string;
-      }>();
+      expectTypeOf<ParseDataType<'record'>>().toEqualTypeOf<RecordId>();
     });
 
     it('parses geometry types', () => {
-      expectTypeOf<ParseDataType<'geometry<point>'>>().toExtend<{
-        type: string;
-        coordinates: unknown;
-      }>();
+      expectTypeOf<ParseDataType<'geometry<point>'>>().toEqualTypeOf<PointGeometry>();
     });
 
     it('parses geometry subtypes', () => {
-      expectTypeOf<ParseDataType<'geometry<point>'>>().toExtend<{
-        type: 'Point';
-        coordinates: [number, number];
-      }>();
-      expectTypeOf<ParseDataType<'geometry<linestring>'>>().toExtend<{
-        type: 'LineString';
-        coordinates: [number, number][];
-      }>();
-      expectTypeOf<ParseDataType<'geometry<polygon>'>>().toExtend<{
-        type: 'Polygon';
-        coordinates: [number, number][][];
-      }>();
-      expectTypeOf<ParseDataType<'geometry<multipoint>'>>().toExtend<{
-        type: 'MultiPoint';
-        coordinates: [number, number][];
-      }>();
-      expectTypeOf<ParseDataType<'geometry<multilinestring>'>>().toExtend<{
-        type: 'MultiLineString';
-        coordinates: [number, number][][];
-      }>();
-      expectTypeOf<ParseDataType<'geometry<multipolygon>'>>().toExtend<{
-        type: 'MultiPolygon';
-        coordinates: [number, number][][][];
-      }>();
-      expectTypeOf<ParseDataType<'geometry<collection>'>>().toExtend<{
-        type: 'GeometryCollection';
-        geometries: unknown[];
-      }>();
-      // Unknown subtype falls back to GeoJSON
-      expectTypeOf<ParseDataType<'geometry<unknown>'>>().toExtend<GeoJSON>();
+      expectTypeOf<ParseDataType<'geometry<point>'>>().toEqualTypeOf<PointGeometry>();
+      expectTypeOf<ParseDataType<'geometry<linestring>'>>().toEqualTypeOf<LineStringGeometry>();
+      expectTypeOf<ParseDataType<'geometry<polygon>'>>().toEqualTypeOf<PolygonGeometry>();
+      expectTypeOf<ParseDataType<'geometry<multipoint>'>>().toEqualTypeOf<MultiPointGeometry>();
+      expectTypeOf<
+        ParseDataType<'geometry<multilinestring>'>
+      >().toEqualTypeOf<MultiLineStringGeometry>();
+      expectTypeOf<ParseDataType<'geometry<multipolygon>'>>().toEqualTypeOf<MultiPolygonGeometry>();
+      expectTypeOf<ParseDataType<'geometry<collection>'>>().toEqualTypeOf<GeometryCollection>();
+      // Unknown subtype falls back to Geometry
+      expectTypeOf<ParseDataType<'geometry<unknown>'>>().toEqualTypeOf<Geometry>();
     });
 
     it('parses range types', () => {
-      expectTypeOf<ParseDataType<'range<int>'>>().toEqualTypeOf<[number, number]>();
-      expectTypeOf<ParseDataType<'range<float>'>>().toEqualTypeOf<[number, number]>();
-      expectTypeOf<ParseDataType<'range<number>'>>().toEqualTypeOf<[number, number]>();
+      expectTypeOf<ParseDataType<'range<int>'>>().toEqualTypeOf<Range<number>>();
+      expectTypeOf<ParseDataType<'range<float>'>>().toEqualTypeOf<Range<number>>();
+      expectTypeOf<ParseDataType<'range<number>'>>().toEqualTypeOf<Range<number>>();
+    });
+
+    it('parses plain range type', () => {
+      expectTypeOf<ParseDataType<'range'>>().toEqualTypeOf<Range>();
     });
   });
 
@@ -176,41 +157,30 @@ describe('ParseDataType', () => {
     });
 
     it('parses set array', () => {
-      expectTypeOf<ParseDataType<'array<set<string>>'>>().toEqualTypeOf<Set<string>[]>();
+      expectTypeOf<ParseDataType<'array<set<string>>'>>().toEqualTypeOf<string[][]>();
     });
   });
 
   describe('Record types with pipe separator', () => {
     it('parses record with single table', () => {
-      expectTypeOf<ParseDataType<'record<user>'>>().toExtend<{
-        readonly __table: 'user';
-        readonly __id: string;
-      }>();
+      expectTypeOf<ParseDataType<'record<user>'>>().toEqualTypeOf<RecordId<'user'>>();
     });
 
     it('parses record with union types', () => {
       type Result = ParseDataType<'record<user|post>'>;
-      expectTypeOf<Result>().toExtend<
-        | { readonly __table: 'user'; readonly __id: string }
-        | { readonly __table: 'post'; readonly __id: string }
-      >();
+      expectTypeOf<Result>().toEqualTypeOf<RecordId<'user'> | RecordId<'post'>>();
     });
 
     it('parses record with multiple union types', () => {
       type Result = ParseDataType<'record<user|post|comment>'>;
-      expectTypeOf<Result>().toExtend<
-        | { readonly __table: 'user'; readonly __id: string }
-        | { readonly __table: 'post'; readonly __id: string }
-        | { readonly __table: 'comment'; readonly __id: string }
+      expectTypeOf<Result>().toEqualTypeOf<
+        RecordId<'user'> | RecordId<'post'> | RecordId<'comment'>
       >();
     });
 
     it('handles whitespace in union types', () => {
       type Result = ParseDataType<'record<user | post>'>;
-      expectTypeOf<Result>().toExtend<
-        | { readonly __table: 'user'; readonly __id: string }
-        | { readonly __table: 'post'; readonly __id: string }
-      >();
+      expectTypeOf<Result>().toEqualTypeOf<RecordId<'user'> | RecordId<'post'>>();
     });
   });
 
@@ -221,8 +191,8 @@ describe('ParseDataType', () => {
     });
 
     it('parses set with max size parameter', () => {
-      expectTypeOf<ParseDataType<'set<string, 100>'>>().toEqualTypeOf<Set<string>>();
-      expectTypeOf<ParseDataType<'set<int, 50>'>>().toEqualTypeOf<Set<number>>();
+      expectTypeOf<ParseDataType<'set<string, 100>'>>().toEqualTypeOf<string[]>();
+      expectTypeOf<ParseDataType<'set<int, 50>'>>().toEqualTypeOf<number[]>();
     });
 
     it('parses nested types with parameters', () => {
@@ -258,8 +228,7 @@ describe('ParseDataType', () => {
     it('handles complex nested types', () => {
       // array<option<array<option<record<user>>>>> = ((RecordId<'user'> | null)[] | null)[]
       type Result = ParseDataType<'array<option<array<option<record<user>>>>>'>;
-      type InnerArray = ({ readonly __table: 'user'; readonly __id: string } | null)[];
-      type Expected = (InnerArray | null)[];
+      type Expected = ((RecordId<'user'> | null)[] | null)[];
       expectTypeOf<Result>().toEqualTypeOf<Expected>();
     });
   });
@@ -298,7 +267,7 @@ describe('ParseDataType', () => {
 
     it('parses union of type and literal', () => {
       type Result = ParseDataType<'datetime | uuid | "N/A"'>;
-      expectTypeOf<Result>().toEqualTypeOf<Date | string | 'N/A'>();
+      expectTypeOf<Result>().toEqualTypeOf<Datetime | UUID | 'N/A'>();
     });
 
     it('parses simple object literal', () => {
@@ -319,18 +288,16 @@ describe('ParseDataType', () => {
     it('parses complex object union (SurrealDB error_info pattern)', () => {
       type Result =
         ParseDataType<'{ Continue: { message: string }} | { Retry: { after: duration }} | { Deprecated: { message: string }}'>;
-      expectTypeOf<Result>().toExtend<
+      expectTypeOf<Result>().toEqualTypeOf<
         | { Continue: { message: string } }
-        | { Retry: { after: string } }
+        | { Retry: { after: Duration } }
         | { Deprecated: { message: string } }
       >();
     });
 
     it('parses object with nested types', () => {
       type Result = ParseDataType<'{ users: array<record<user>> }'>;
-      expectTypeOf<Result>().toExtend<{
-        users: { readonly __table: 'user'; readonly __id: string }[];
-      }>();
+      expectTypeOf<Result>().toEqualTypeOf<{ users: RecordId<'user'>[] }>();
     });
 
     it('parses union with object and string literal', () => {
@@ -367,14 +334,12 @@ describe('ParseDataType', () => {
 
     it('parses tuple with record types', () => {
       type Result = ParseDataType<'[record<user>, string]'>;
-      expectTypeOf<Result>().toExtend<
-        [{ readonly __table: 'user'; readonly __id: string }, string]
-      >();
+      expectTypeOf<Result>().toEqualTypeOf<[RecordId<'user'>, string]>();
     });
 
     it('parses tuple in union with string', () => {
       type Result = ParseDataType<'[string, int] | "none"'>;
-      expectTypeOf<Result>().toExtend<[string, number] | 'none'>();
+      expectTypeOf<Result>().toEqualTypeOf<[string, number] | 'none'>();
     });
 
     it('parses nested tuples', () => {
@@ -408,15 +373,12 @@ describe('ParseDataType', () => {
 
     it('accepts type with underscores', () => {
       type Result = ParseDataType<'record<my_table>'>;
-      expectTypeOf<Result>().toExtend<{ readonly __table: 'my_table'; readonly __id: string }>();
+      expectTypeOf<Result>().toEqualTypeOf<RecordId<'my_table'>>();
     });
 
     it('accepts type with dots', () => {
       type Result = ParseDataType<'record<schema.table>'>;
-      expectTypeOf<Result>().toExtend<{
-        readonly __table: 'schema.table';
-        readonly __id: string;
-      }>();
+      expectTypeOf<Result>().toEqualTypeOf<RecordId<'schema.table'>>();
     });
 
     it('accepts whitespace', () => {

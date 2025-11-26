@@ -46,10 +46,6 @@ export type CollectionItemType =
   | 'object'
   | 'record';
 
-// =============================================================================
-// Complex Types
-// =============================================================================
-
 /**
  * Array type definitions.
  * @example
@@ -85,13 +81,13 @@ export type SetType =
   | `set<${string}>`;
 
 /**
- * Geometry type definitions.
+ * Geometry type definitions (SurrealQL syntax).
  * @example
  * - `geometry`
  * - `geometry<point>`
  * - `geometry<polygon>`
  */
-export type GeometryType = 'geometry' | `geometry<${GeometrySubtype}>`;
+export type GeometryDataType = 'geometry' | `geometry<${GeometrySubtype}>`;
 
 /**
  * Record type definitions (references to other tables).
@@ -139,10 +135,6 @@ export type TupleType = `[${string}]`;
  */
 export type UnionType = `${string}|${string}`;
 
-// =============================================================================
-// Nullable & Option Types
-// =============================================================================
-
 /**
  * Types that can be wrapped in `option<T>`.
  */
@@ -150,7 +142,7 @@ export type NullableType =
   | PrimitiveType
   | ArrayType
   | SetType
-  | GeometryType
+  | GeometryDataType
   | RecordType
   | RangeType
   | LiteralType
@@ -185,7 +177,7 @@ export type DataType =
   | PrimitiveType
   | ArrayType
   | SetType
-  | GeometryType
+  | GeometryDataType
   | RecordType
   | RangeType
   | LiteralType

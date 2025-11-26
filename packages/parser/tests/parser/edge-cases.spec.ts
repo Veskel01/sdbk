@@ -1,5 +1,11 @@
 import { describe, expectTypeOf, it } from 'bun:test';
-import type { ParseDataType, ParseSchema, ParseStatement, SplitStatements } from '../../src';
+import type {
+  ParseDataType,
+  ParseSchema,
+  ParseStatement,
+  RecordId,
+  SplitStatements
+} from '../../src';
 
 describe('Edge Cases', () => {
   describe('Comments in strings', () => {
@@ -108,7 +114,7 @@ describe('Edge Cases', () => {
 
     it('handles nested option and array', () => {
       expectTypeOf<ParseDataType<'array<option<record<user>>>'>>().toEqualTypeOf<
-        ({ readonly __table: 'user'; readonly __id: string } | null)[]
+        (RecordId<'user'> | null)[]
       >();
     });
 
@@ -122,30 +128,19 @@ describe('Edge Cases', () => {
   describe('Record union types', () => {
     it('handles record with two tables', () => {
       type Result = ParseDataType<'record<user|post>'>;
-      expectTypeOf<Result>().toExtend<
-        | { readonly __table: 'user'; readonly __id: string }
-        | { readonly __table: 'post'; readonly __id: string }
-      >();
+      expectTypeOf<Result>().toEqualTypeOf<RecordId<'user'> | RecordId<'post'>>();
     });
 
     it('handles record with three tables', () => {
       type Result = ParseDataType<'record<user|post|comment>'>;
-      expectTypeOf<Result>().toExtend<
-        | { readonly __table: 'user'; readonly __id: string }
-        | { readonly __table: 'post'; readonly __id: string }
-        | { readonly __table: 'comment'; readonly __id: string }
+      expectTypeOf<Result>().toEqualTypeOf<
+        RecordId<'user'> | RecordId<'post'> | RecordId<'comment'>
       >();
     });
 
     it('handles record union in option', () => {
       type Result = ParseDataType<'option<record<user|post>>'>;
-      expectTypeOf<Result>().toExtend<
-        | (
-            | { readonly __table: 'user'; readonly __id: string }
-            | { readonly __table: 'post'; readonly __id: string }
-          )
-        | null
-      >();
+      expectTypeOf<Result>().toEqualTypeOf<RecordId<'user'> | RecordId<'post'> | null>();
     });
   });
 
@@ -156,7 +151,7 @@ describe('Edge Cases', () => {
     });
 
     it('ignores max size parameter in set', () => {
-      expectTypeOf<ParseDataType<'set<string, 100>'>>().toEqualTypeOf<Set<string>>();
+      expectTypeOf<ParseDataType<'set<string, 100>'>>().toEqualTypeOf<string[]>();
     });
 
     it('handles nested types with parameters', () => {

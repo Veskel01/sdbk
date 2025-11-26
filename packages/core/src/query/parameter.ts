@@ -1,4 +1,4 @@
-import { ENTITY_KIND } from '../entity';
+import { KIND } from '../meta';
 
 /**
  * An encoder for a SurrealQL parameter.
@@ -16,9 +16,7 @@ export interface Encoder {
  * @returns The encoded value.
  */
 export class Parameter {
-  public static readonly [ENTITY_KIND] = 'param';
-
-  public static readonly TOKEN = '$' as const;
+  public static readonly [KIND] = 'param';
 
   private readonly _value: unknown;
   private readonly _encoder?: Encoder;

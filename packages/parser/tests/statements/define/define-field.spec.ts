@@ -1,5 +1,5 @@
 import { describe, expectTypeOf, it } from 'bun:test';
-import type { ParseSchema } from '../../../src';
+import type { Datetime, Duration, ParseSchema, PointGeometry, RecordId, UUID } from '../../../src';
 
 describe('DEFINE FIELD', () => {
   describe('Basic field definitions', () => {
@@ -97,9 +97,7 @@ describe('DEFINE FIELD', () => {
         DEFINE FIELD roles ON user TYPE set<string>
       `>;
 
-      expectTypeOf<schema['tables']['user']['fields']['roles']['type']>().toEqualTypeOf<
-        Set<string>
-      >();
+      expectTypeOf<schema['tables']['user']['fields']['roles']['type']>().toEqualTypeOf<string[]>();
     });
 
     it('parses record types', () => {
@@ -108,10 +106,9 @@ describe('DEFINE FIELD', () => {
         DEFINE FIELD author ON post TYPE record<user>
       `>;
 
-      expectTypeOf<schema['tables']['post']['fields']['author']['type']>().toExtend<{
-        readonly __table: 'user';
-        readonly __id: string;
-      }>();
+      expectTypeOf<schema['tables']['post']['fields']['author']['type']>().toEqualTypeOf<
+        RecordId<'user'>
+      >();
     });
 
     it('parses FLEXIBLE type', () => {
@@ -455,7 +452,7 @@ describe('DEFINE FIELD', () => {
       >().toEqualTypeOf<'time.created_at'>();
       expectTypeOf<
         schema['tables']['user']['fields']['time.created_at']['type']
-      >().toEqualTypeOf<Date>();
+      >().toEqualTypeOf<Datetime>();
     });
 
     it('handles wildcard field names for array elements', () => {
@@ -477,7 +474,7 @@ describe('DEFINE FIELD', () => {
       >().toEqualTypeOf<'addresses.*.coordinates'>();
       expectTypeOf<
         schema['tables']['address_history']['fields']['addresses.*.coordinates']['type']
-      >().toExtend<{ type: 'Point'; coordinates: [number, number] }>();
+      >().toEqualTypeOf<PointGeometry>();
     });
   });
 
@@ -525,7 +522,7 @@ describe('DEFINE FIELD', () => {
       `>;
 
       expectTypeOf<schema['tables']['user']['fields']['value']['type']>().toEqualTypeOf<
-        Date | string | 'N/A'
+        Datetime | UUID | 'N/A'
       >();
     });
 
@@ -564,7 +561,7 @@ describe('DEFINE FIELD', () => {
       type ErrorInfo = schema['tables']['information']['fields']['error_info']['type'];
       expectTypeOf<ErrorInfo>().toExtend<
         | { Continue: { message: string } }
-        | { Retry: { after: string } }
+        | { Retry: { after: Duration } }
         | { Deprecated: { message: string } }
       >();
     });
@@ -595,7 +592,7 @@ describe('DEFINE FIELD', () => {
 
       expectTypeOf<schema['tables']['user']['fields']['meta']['type']>().toExtend<{
         tags: string[];
-        owner: { readonly __table: 'user'; readonly __id: string };
+        owner: RecordId<'user'>;
       }>();
     });
   });

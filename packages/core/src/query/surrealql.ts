@@ -1,45 +1,19 @@
-import { ENTITY_KIND, is } from '../entity';
-import { isNullish, isString } from '../runtime';
-import { getIncrementalID } from './id-generator';
+import { NAME_REGEX, TOKEN } from '../constants';
+import { is, KIND } from '../meta';
+import { isNullish, isString } from '../util/guards';
 import { Identifier } from './identifier';
 import { Parameter } from './parameter';
-
-/**
- * Represents a compiled SQL query with named parameter bindings.
- */
-export interface Query {
-  readonly query: string;
-  readonly bindings: Record<string, unknown>;
-}
-
-/**
- * Represents a value that can be converted to a SurrealQL expression.
- */
-export interface SQLConvertible<T = unknown> {
-  toSurrealQL(): SurrealQL<T>;
-}
-
-/**
- * Phantom metadata type for compile-time type safety.
- */
-export interface $SQL<T> {
-  readonly type: T;
-}
-
-/**
- * A fragment that can be part of a SurrealQL query.
- * Can be a raw string, an identifier, a parameter, or any object that can be converted to SurrealQL.
- */
-export type SQLFragment = string | Identifier | Parameter | SQLConvertible | SurrealQL;
+import type { $SQL, Query, SQLConvertible, SQLFragment } from './types';
+import { getIncrementalID } from './utils/id-generator';
 
 /**
  * A composable SQL expression builder for SurrealDB queries.
  */
 export class SurrealQL<T = unknown> implements SQLConvertible<T> {
-  public static readonly [ENTITY_KIND] = 'surrealql';
+  public static readonly [KIND] = 'surrealql';
 
-  private static readonly NAME_REGEX = /^[a-zA-Z_][a-zA-Z0-9_]*$/;
-  private static readonly BINDING_TOKEN = 'bind__' as const;
+  private static readonly NAME_REGEX = NAME_REGEX;
+  private static readonly BINDING_TOKEN = TOKEN.BINDING;
 
   /**
    * Phantom metadata property for compile-time type checking.
@@ -95,7 +69,7 @@ export class SurrealQL<T = unknown> implements SQLConvertible<T> {
       if (is(Parameter, fragment)) {
         const bindingName = `${SurrealQL.BINDING_TOKEN}${getIncrementalID()}`;
         bindings[bindingName] = fragment.getDriverValue();
-        query += `${Parameter.TOKEN}${bindingName}`;
+        query += `${TOKEN.PARAM}${bindingName}`;
         continue;
       }
 
@@ -206,7 +180,7 @@ surql.identifier = (value: string): Identifier => new Identifier(value);
  * @param raw - The raw SQL string
  * @returns A SurrealQL expression containing the raw SQL
  */
-surql.raw = (raw: string): SurrealQL => new SurrealQL([raw]);
+surql.raw = <T = unknown>(raw: string): SurrealQL<T> => new SurrealQL<T>([raw]);
 
 /**
  * Joins multiple SQL expressions with a separator.

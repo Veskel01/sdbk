@@ -21,6 +21,11 @@ parsing happens at the type level.
   - [Quick Start](#quick-start)
   - [Supported Statements](#supported-statements)
   - [Type Mapping](#type-mapping)
+    - [Primitive Types](#primitive-types)
+    - [Collection Types](#collection-types)
+    - [Special Types](#special-types)
+    - [Geometry Types](#geometry-types)
+    - [Composite Types](#composite-types)
   - [API Reference](#api-reference)
     - [ParseSchema](#parseschema)
     - [ParseStatement](#parsestatement)
@@ -39,6 +44,8 @@ parsing happens at the type level.
     - [tsconfig.json Recommendations](#tsconfigjson-recommendations)
   - [Performance Considerations](#performance-considerations)
   - [Contributing](#contributing)
+  - [TypeMap Reference](#typemap-reference)
+    - [Sub-Maps](#sub-maps)
   - [License](#license)
 
 ## Features
@@ -47,12 +54,14 @@ parsing happens at the type level.
   TypeScript's type system
 - 📝 **Full DEFINE Syntax Support** — Parses all 13 DEFINE statement types
 - 🔄 **SurrealQL to TypeScript Type Mapping** — Automatic conversion of
-  SurrealQL types to TypeScript equivalents
+  SurrealQL types to TypeScript equivalents via `TypeMap`
 - 🛡️ **Type-Safe Schema** — Extract and use your database schema with full
   type safety
 - 📦 **No Dependencies** — Lightweight, standalone package
 - 💬 **Comment Support** — Handles both line (`--`) and block (`/* */`) comments
 - 🔧 **Case Insensitive** — Works with uppercase, lowercase, or mixed-case SQL keywords
+- 🗺️ **Complete Type Coverage** — Supports all SurrealDB data types including
+  geometry, range, and composite types
 
 ## Installation
 
@@ -128,7 +137,9 @@ type EmailIndex = Schema['indexes']['idx_email'];
 
 ## Type Mapping
 
-SurrealQL types are automatically mapped to their TypeScript equivalents:
+SurrealQL types are automatically mapped to their TypeScript equivalents.
+
+### Primitive Types
 
 | SurrealQL Type | TypeScript Type |
 | :------------- | :-------------- |
@@ -138,22 +149,56 @@ SurrealQL types are automatically mapped to their TypeScript equivalents:
 | `decimal` | `number` |
 | `number` | `number` |
 | `bool` | `boolean` |
-| `datetime` | `Date` |
-| `duration` | `Duration` (branded string) |
-| `uuid` | `string` |
-| `ulid` | `string` |
-| `bytes` | `Uint8Array` |
+| `datetime` | `Datetime` (branded) |
+| `duration` | `Duration` (branded) |
+| `uuid` | `UUID` (branded) |
+| `ulid` | `ULID` (branded) |
+| `bytes` | `Bytes` (branded) |
 | `object` | `Record<string, unknown>` |
 | `any` | `unknown` |
+
+### Collection Types
+
+| SurrealQL Type | TypeScript Type |
+| :------------- | :-------------- |
 | `array<T>` | `T[]` |
-| `set<T>` | `Set<T>` |
+| `set<T>` | `T[]` |
 | `option<T>` | `T \| null` |
+
+### Special Types
+
+| SurrealQL Type | TypeScript Type |
+| :------------- | :-------------- |
 | `record<table>` | `RecordId<'table'>` |
 | `record<a\|b>` | `RecordId<'a'> \| RecordId<'b'>` |
+| `range<T>` | `Range<T>` |
+| `literal<"value">` | `'value'` |
+| `null` | `null` |
+
+### Geometry Types
+
+| SurrealQL Type | TypeScript Type |
+| :------------- | :-------------- |
+| `geometry` | `AnyGeometry` |
 | `geometry<point>` | `PointGeometry` |
+| `geometry<linestring>` | `LineStringGeometry` |
 | `geometry<polygon>` | `PolygonGeometry` |
-| `geometry<...>` | `GeoJSON` |
-| `range<T>` | `[number, number]` |
+| `geometry<multipoint>` | `MultiPointGeometry` |
+| `geometry<multilinestring>` | `MultiLineStringGeometry` |
+| `geometry<multipolygon>` | `MultiPolygonGeometry` |
+| `geometry<collection>` | `GeometryCollection` |
+
+### Composite Types
+
+The parser also supports inline type definitions:
+
+| SurrealQL Type | TypeScript Type |
+| :------------- | :-------------- |
+| `[T, U, V]` | `[T, U, V]` (tuple) |
+| `{ key: T }` | `{ key: T }` (object literal) |
+| `T \| U` | `T \| U` (union) |
+| `"a" \| "b"` | `'a' \| 'b'` (string literal union) |
+| `1 \| 2 \| 3` | `1 \| 2 \| 3` (number literal union) |
 
 ## API Reference
 
@@ -209,14 +254,37 @@ type FieldResult = ParseStatement<'DEFINE FIELD email ON user TYPE string'>;
 Parse a SurrealQL type string into its TypeScript equivalent.
 
 ```typescript
-import type { ParseDataType } from '@sdbk/parser';
+import type { ParseDataType, Range, RecordId } from '@sdbk/parser';
 
+// Primitive types
 type StringType = ParseDataType<'string'>;           // string
+type IntType = ParseDataType<'int'>;                 // number
+type BoolType = ParseDataType<'bool'>;               // boolean
+
+// Collection types
 type ArrayType = ParseDataType<'array<int>'>;        // number[]
+type SetType = ParseDataType<'set<string>'>;         // string[]
 type OptionType = ParseDataType<'option<string>'>;   // string | null
+
+// Record types
 type RecordType = ParseDataType<'record<user>'>;     // RecordId<'user'>
 type UnionRecord = ParseDataType<'record<user|post>'>; // RecordId<'user'> | RecordId<'post'>
+
+// Range types
+type RangeType = ParseDataType<'range<int>'>;        // Range<number>
+
+// Geometry types
+type PointType = ParseDataType<'geometry<point>'>;   // PointGeometry
+type PolyType = ParseDataType<'geometry<polygon>'>;  // PolygonGeometry
+
+// Nested types
 type NestedType = ParseDataType<'array<option<string>>'>; // (string | null)[]
+type ComplexType = ParseDataType<'array<record<user>>'>;  // RecordId<'user'>[]
+
+// Inline types
+type TupleType = ParseDataType<'[string, int, bool]'>; // [string, number, boolean]
+type ObjectType = ParseDataType<'{ name: string, age: int }'>; // { name: string; age: number }
+type UnionType = ParseDataType<'"active" | "inactive"'>; // 'active' | 'inactive'
 ```
 
 ### SplitStatements
@@ -452,6 +520,38 @@ type CheckError = IsParseError<Result>; // true
 Contributions are welcome! Please see the
 [main repository](https://github.com/veskel01/sdbk) for contribution
 guidelines.
+
+## TypeMap Reference
+
+The `TypeMap` type serves as the single source of truth for all SurrealQL to TypeScript
+type mappings. It combines four sub-maps:
+
+```typescript
+import type {
+  TypeMap,
+  PrimitiveTypeMap,
+  CollectionTypeMap,
+  SpecialTypeMap,
+  GeometryTypeMap
+} from '@sdbk/parser';
+
+// TypeMap = PrimitiveTypeMap & CollectionTypeMap & SpecialTypeMap & GeometryTypeMap
+
+// Access specific type mappings
+type StringMapping = TypeMap['string'];     // string
+type ArrayMapping = TypeMap['array'];       // unknown[]
+type RecordMapping = TypeMap['record'];     // RecordId
+type PointMapping = TypeMap['point'];       // PointGeometry
+```
+
+### Sub-Maps
+
+| Map | Description |
+| :-- | :---------- |
+| `PrimitiveTypeMap` | Basic types: `string`, `int`, `float`, `bool`, `datetime`, etc. |
+| `CollectionTypeMap` | Container types: `array`, `set`, `option` |
+| `SpecialTypeMap` | Special types: `record`, `range`, `geometry`, `literal`, `null` |
+| `GeometryTypeMap` | Geometry subtypes: `point`, `linestring`, `polygon`, etc. |
 
 ## License
 

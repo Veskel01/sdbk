@@ -1,5 +1,5 @@
 import { describe, expectTypeOf, it } from 'bun:test';
-import type { ParseDataType } from '../../src';
+import type { ParseDataType, RecordId } from '../../src';
 
 describe('Type Performance and Depth Limits', () => {
   describe('Nested types within depth limit', () => {
@@ -28,7 +28,7 @@ describe('Type Performance and Depth Limits', () => {
 
     it('handles nested record types', () => {
       type Result = ParseDataType<'array<option<record<user>>>'>;
-      type Expected = ({ readonly __table: 'user'; readonly __id: string } | null)[];
+      type Expected = (RecordId<'user'> | null)[];
       expectTypeOf<Result>().toEqualTypeOf<Expected>();
     });
   });

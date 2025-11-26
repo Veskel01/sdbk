@@ -7,4 +7,3 @@ export type * from './errors';
 export type * from './modifiers';
 export type * from './parse-data-type';
 export type * from './tokenizer';
-export type * from './types';

@@ -1,14 +1,15 @@
-import { isNullish } from './runtime';
+import { SYMBOL } from './constants';
+import { isNullish } from './util/guards';
 
-export const ENTITY_KIND = Symbol.for('surrealdb:entity.kind');
+export const KIND = Symbol.for(SYMBOL.KIND);
 
 export interface Entity {
-  [ENTITY_KIND]: string;
+  [KIND]: string;
 }
 
 export type Class<T> = (abstract new (...args: any[]) => T) | (new (...args: any[]) => T);
 
-export type EntityClass<T = unknown> = Class<T> & { [ENTITY_KIND]: string };
+export type EntityClass<T = unknown> = Class<T> & { [KIND]: string };
 
 /**
  * Checks if a value is an instance of an entity class.
@@ -25,7 +26,7 @@ export function is<T extends EntityClass>(type: T, value: unknown): value is Ins
     return true;
   }
 
-  if (!Object.hasOwn(type, ENTITY_KIND)) {
+  if (!Object.hasOwn(type, KIND)) {
     throw new Error(
       `Class "${type.name ?? '<unknown>'}" doesn't look like a SurrealDB entity. If this is incorrect and the class is provided by SurrealDB query engine, please report this as a bug.`
     );
@@ -35,7 +36,7 @@ export function is<T extends EntityClass>(type: T, value: unknown): value is Ins
 
   if (cls) {
     while (cls) {
-      if (ENTITY_KIND in cls && cls[ENTITY_KIND] === type[ENTITY_KIND]) {
+      if (KIND in cls && cls[KIND] === type[KIND]) {
         return true;
       }
 

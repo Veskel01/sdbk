@@ -15,6 +15,7 @@ export type * from './param';
 export type * from './root';
 export type * from './sequence';
 export type * from './table';
+export type * from './type-map';
 export type * from './user';
 
 /**
