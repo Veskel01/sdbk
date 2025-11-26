@@ -48,8 +48,5 @@
   },
   "peerDependencies": {
     "typescript": ">=5.0.0"
-  },
-  "devDependencies": {
-    "@sdbk/parser": "workspace:*"
   }
 }
