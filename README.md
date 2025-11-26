@@ -39,15 +39,6 @@ types, building blocks, and shared abstractions used across rest of the packages
 - Runtime type guards
 - Shared utilities for other packages
 
-### [`@sdbk/parser`](./packages/parser)
-
-A compile-time SurrealQL parser that transforms database schema definitions into
-fully typed TypeScript types. Useful for type generation and schema validation.
-
-**Status:** 🚧 In Development
-
-[📖 Read the documentation](./packages/parser/README.md)
-
 ### Planned Packages
 
 The following packages are planned and will build on top of `@sdbk/core`:
@@ -63,8 +54,6 @@ utilities.*
 
 Check out the individual package documentation for usage examples:
 
-- [Parser Usage](./packages/parser/README.md) — Type generation from SurrealQL
-  schemas
 - [Core Usage](./packages/core/) — Core types and utilities
 
 More examples and documentation will be added as packages are developed.
@@ -124,8 +113,7 @@ bun run format
 ```text
 sdbk/
 ├── packages/
-│   ├── core/          # Core type definitions
-│   └── parser/        # SurrealQL parser
+│   └── core/          # Core type definitions
 ├── scripts/           # Build and utility scripts
 └── turbo.json         # Turbo configuration
 ```

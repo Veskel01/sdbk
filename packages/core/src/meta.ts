@@ -1,15 +1,13 @@
-import { SYMBOL } from './constants';
-import { isNullish } from './util/guards';
+import type { AnyClass } from './types';
+import { isNullish, isObject } from './utils';
 
-export const KIND = Symbol.for(SYMBOL.KIND);
+export const ENTITY_KIND = Symbol.for('entity-kind');
 
 export interface Entity {
-  [KIND]: string;
+  [ENTITY_KIND]: string;
 }
 
-export type Class<T> = (abstract new (...args: any[]) => T) | (new (...args: any[]) => T);
-
-export type EntityClass<T = unknown> = Class<T> & { [KIND]: string };
+export type EntityClass<T = unknown> = AnyClass<T> & { [ENTITY_KIND]: string };
 
 /**
  * Checks if a value is an instance of an entity class.
@@ -18,7 +16,7 @@ export type EntityClass<T = unknown> = Class<T> & { [KIND]: string };
  * @returns `true` if the value is an instance of the entity class, `false` otherwise.
  */
 export function is<T extends EntityClass>(type: T, value: unknown): value is InstanceType<T> {
-  if (isNullish(value) || typeof value !== 'object') {
+  if (isNullish(value) || !isObject(value)) {
     return false;
   }
 
@@ -26,22 +24,16 @@ export function is<T extends EntityClass>(type: T, value: unknown): value is Ins
     return true;
   }
 
-  if (!Object.hasOwn(type, KIND)) {
+  if (!Object.hasOwn(type, ENTITY_KIND)) {
     throw new Error(
       `Class "${type.name ?? '<unknown>'}" doesn't look like a SurrealDB entity. If this is incorrect and the class is provided by SurrealDB query engine, please report this as a bug.`
     );
   }
 
-  let cls = Object.getPrototypeOf(type).constructor;
+  const valueConstructor = Object.getPrototypeOf(value)?.constructor;
 
-  if (cls) {
-    while (cls) {
-      if (KIND in cls && cls[KIND] === type[KIND]) {
-        return true;
-      }
-
-      cls = Object.getPrototypeOf(cls);
-    }
+  if (valueConstructor && ENTITY_KIND in valueConstructor) {
+    return valueConstructor[ENTITY_KIND] === type[ENTITY_KIND];
   }
 
   return false;

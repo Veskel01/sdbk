@@ -4,11 +4,21 @@
   "linter": {
     "rules": {
       "suspicious": {
-        // Any is used for most generic types
         "noExplicitAny": "off"
       },
       "performance": {
         "noBarrelFile": "off"
+      },
+      "style": {
+        "noNamespace": "off"
+      },
+      "nursery": {
+        "useMaxParams": {
+          "level": "warn",
+          "options": {
+            "max": 6
+          }
+        }
       }
     }
   }
