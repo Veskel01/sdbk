@@ -6,6 +6,9 @@
       "test": "all"
     },
     "rules": {
+      "complexity": {
+        "useLiteralKeys": "off"
+      },
       "style": {
         "useConsistentTypeDefinitions": "off",
         "useConsistentMemberAccessibility": {
